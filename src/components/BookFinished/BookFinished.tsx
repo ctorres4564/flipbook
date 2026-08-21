@@ -22,9 +22,10 @@ export const BookFinished: React.FC<BookFinishedProps> = ({ book, onRestart }) =
 
         <button
           type="button"
+          id="btn-restart-book"
           onClick={onRestart}
           className="btn-start"
-          aria-label="Ler o livro novamente do início"
+          aria-label="Ler o livro novamente"
           autoFocus
         >
           <RotateCcw size={22} />

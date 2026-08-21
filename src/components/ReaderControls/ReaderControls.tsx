@@ -123,15 +123,15 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
           {isMuted ? <VolumeX size={20} color="#f43f5e" /> : <Volume2 size={20} />}
         </button>
 
-        {/* Próxima Página */}
+        {/* Próxima Página / Concluir */}
         <button
           type="button"
           id="btn-next-page"
           onClick={onNextPage}
-          disabled={currentPage >= totalPages}
+          disabled={currentPage > totalPages}
           className="control-btn"
-          aria-label="Próxima página"
-          title="Próxima página (Seta direita)"
+          aria-label={currentPage === totalPages ? 'Concluir leitura' : 'Próxima página'}
+          title={currentPage === totalPages ? 'Concluir leitura' : 'Próxima página (Seta direita)'}
         >
           <ChevronRight size={22} />
         </button>
