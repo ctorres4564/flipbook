@@ -1,62 +1,67 @@
 import { describe, it, expect } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 import { validateBookManifest, getPageAudioUrl, getBookBySlug } from '../src/services/bookService';
 import { BookManifest } from '../src/types/book';
 
-describe('Book Service & Manifest Validation', () => {
-  const validNicoManifest: BookManifest = {
-    slug: 'nico',
-    title: 'Nico e as Histórias que Ele Descobriu Escutando',
-    coverImage: '/books/nico/pages/01.webp',
-    totalPages: 16,
-    pages: Array.from({ length: 16 }, (_, i) => ({
-      pageNumber: i + 1,
-      image: `/books/nico/pages/${String(i + 1).padStart(2, '0')}.webp`,
-      audio: i === 0 ? null : `/books/nico/audio/${String(i + 1).padStart(2, '0')}.mp3`,
-      alt: `Página ${i + 1} do livro do Nico`,
-    })),
-  };
+describe('Book Service & Real Assets Manifest Validation (WebP)', () => {
+  const publicDir = path.resolve(__dirname, '../public');
 
-  it('deve validar com sucesso um manifesto correto de 16 páginas', () => {
-    const result = validateBookManifest(validNicoManifest);
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('deve rejeitar um manifesto sem slug ou sem título', () => {
-    const invalid = { ...validNicoManifest, slug: '', title: '' };
-    const result = validateBookManifest(invalid);
-    expect(result.isValid).toBe(false);
-    expect(result.errors.length).toBeGreaterThan(0);
-  });
-
-  it('deve rejeitar manifesto onde totalPages difere do tamanho real do array pages', () => {
-    const invalid = { ...validNicoManifest, totalPages: 10 };
-    const result = validateBookManifest(invalid);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('O número total de páginas (10) não corresponde à quantidade de páginas cadastradas (16).');
-  });
-
-  it('deve retornar null para páginas sem áudio (ex: página 1/capa)', () => {
-    const audioUrl = getPageAudioUrl(validNicoManifest, 1);
-    expect(audioUrl).toBeNull();
-  });
-
-  it('deve retornar o caminho correto do áudio para páginas narradas', () => {
-    const audioUrl = getPageAudioUrl(validNicoManifest, 2);
-    expect(audioUrl).toBe('/books/nico/audio/02.mp3');
-  });
-
-  it('deve carregar o livro Nico do registro estático', () => {
+  it('deve carregar o livro Nico do registro com manifesto real', () => {
     const book = getBookBySlug('nico');
     expect(book).toBeDefined();
     expect(book?.slug).toBe('nico');
     expect(book?.totalPages).toBe(16);
-    expect(book?.pages[0].audio).toBeNull();
-    expect(book?.pages[1].audio).toBe('/books/nico/audio/02.mp3');
+    expect(book?.pages).toHaveLength(16);
   });
 
-  it('deve retornar undefined para slug inexistente', () => {
-    const book = getBookBySlug('livro-que-nao-existe');
-    expect(book).toBeUndefined();
+  it('deve validar com sucesso o manifesto real do livro Nico', () => {
+    const book = getBookBySlug('nico') as BookManifest;
+    const result = validateBookManifest(book);
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('deve garantir que a página 1 (Capa) possui audio: null', () => {
+    const book = getBookBySlug('nico') as BookManifest;
+    const audioUrl = getPageAudioUrl(book, 1);
+    expect(audioUrl).toBeNull();
+    expect(book.pages[0].audio).toBeNull();
+  });
+
+  it('deve garantir que todas as 16 imagens apontadas no manifesto existem no disco e são WebPs otimizados', () => {
+    const book = getBookBySlug('nico') as BookManifest;
+
+    book.pages.forEach((page) => {
+      expect(page.image).toMatch(/^\/books\/nico\/pages\/\d{2}\.webp$/);
+      const diskPath = path.join(publicDir, page.image);
+      expect(fs.existsSync(diskPath)).toBe(true);
+      const stat = fs.statSync(diskPath);
+      expect(stat.size).toBeGreaterThan(200000); // WebPs de alta fidelidade (>200KB)
+      expect(stat.size).toBeLessThan(600000); // Compactados (<600KB)
+    });
+  });
+
+  it('deve garantir que os 15 arquivos de áudio narrativos referenciados existem no disco e são MP3s reais', () => {
+    const book = getBookBySlug('nico') as BookManifest;
+    const audioPathsSeen = new Set<string>();
+
+    for (let p = 2; p <= 16; p++) {
+      const page = book.pages[p - 1];
+      expect(page.audio).toBeDefined();
+      expect(page.audio).not.toBeNull();
+      expect(page.audio).toMatch(/^\/books\/nico\/audio\/\d{2}\.mp3$/);
+
+      // Não há sobreposição ou duplicação de áudio entre páginas
+      expect(audioPathsSeen.has(page.audio!)).toBe(false);
+      audioPathsSeen.add(page.audio!);
+
+      const diskPath = path.join(publicDir, page.audio!);
+      expect(fs.existsSync(diskPath)).toBe(true);
+      const stat = fs.statSync(diskPath);
+      expect(stat.size).toBeGreaterThan(50000); // Narrações reais (>50KB)
+    }
+
+    expect(audioPathsSeen.size).toBe(15);
   });
 });

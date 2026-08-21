@@ -33,6 +33,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   const flipbookContainerRef = useRef<HTMLDivElement | null>(null);
   const pageFlipInstanceRef = useRef<PageFlip | null>(null);
   const readerRootRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLElement | null>(null);
 
   // Escuta áudio
   useEffect(() => {
@@ -82,11 +83,14 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     }
   }, [book, currentPage, mode]);
 
-  // Inicialização do StPageFlip quando entrar no modo READING
+  // Inicialização e Redimensionamento Reativo do StPageFlip quando entrar no modo READING
   useEffect(() => {
     if (mode !== 'READING' || !flipbookContainerRef.current) {
       return;
     }
+
+    let resizeObserver: ResizeObserver | null = null;
+    let animationFrameId: number | null = null;
 
     try {
       // Destrói instância anterior caso exista
@@ -95,22 +99,29 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
         pageFlipInstanceRef.current = null;
       }
 
-      // Calcula dimensões ideais responsivas
-      const containerWidth = flipbookContainerRef.current.parentElement?.clientWidth || window.innerWidth;
-      const containerHeight = flipbookContainerRef.current.parentElement?.clientHeight || window.innerHeight;
+      // Calcula dimensões ideais com base no container e proporção 1:1 das ilustrações
+      const container = stageRef.current || flipbookContainerRef.current.parentElement;
+      const containerWidth = container?.clientWidth || window.innerWidth;
+      const containerHeight = container?.clientHeight || window.innerHeight;
+      const isLandscapeMobile = window.innerHeight <= 500;
       const isMobile = window.innerWidth <= 768;
 
-      // Dimensões base de página (proporção 3:4 ou 4:3 para livro infantil)
-      const baseWidth = isMobile ? Math.min(containerWidth - 16, 480) : 450;
-      const baseHeight = isMobile ? Math.min(containerHeight - 120, 680) : 600;
+      // Dimensões base quadradas com limites seguros para controles e cabeçalho
+      const marginX = isLandscapeMobile ? 12 : (isMobile ? 16 : 40);
+      const marginY = isLandscapeMobile ? 12 : (isMobile ? 80 : 60);
+      const availableSize = Math.min(
+        containerWidth - marginX,
+        containerHeight - marginY
+      );
+      const baseDimension = Math.max(180, Math.min(availableSize, 800));
 
       const pageFlip = new PageFlip(flipbookContainerRef.current, {
-        width: baseWidth,
-        height: baseHeight,
+        width: baseDimension,
+        height: baseDimension,
         size: 'stretch',
-        minWidth: 280,
-        maxWidth: 900,
-        minHeight: 380,
+        minWidth: 160,
+        maxWidth: 1200,
+        minHeight: 160,
         maxHeight: 1200,
         drawShadow: true,
         flippingTime: reducedMotion ? 100 : 700,
@@ -139,11 +150,46 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       });
 
       pageFlipInstanceRef.current = pageFlip;
+
+      // Manipulador com debounce para atualização segura de dimensões
+      const handleResize = () => {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+        animationFrameId = requestAnimationFrame(() => {
+          if (pageFlipInstanceRef.current) {
+            try {
+              pageFlipInstanceRef.current.update();
+            } catch (err) {
+              console.warn('Aviso ao atualizar dimensões do PageFlip:', err);
+            }
+          }
+        });
+      };
+
+      // Registra ResizeObserver no container do palco de leitura
+      if (typeof ResizeObserver !== 'undefined' && container) {
+        resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(container);
+      }
+
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('orientationchange', handleResize);
+
     } catch (err) {
-      console.warn('Inicialização do PageFlip em modo simplificado:', err);
+      console.warn('Inicialização do PageFlip:', err);
     }
 
     return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      window.removeEventListener('resize', () => {});
+      window.removeEventListener('orientationchange', () => {});
+
       if (pageFlipInstanceRef.current) {
         try {
           pageFlipInstanceRef.current.destroy();
@@ -265,7 +311,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       )}
 
       {/* Palco do Flipbook */}
-      <main className="reader-stage" role="main">
+      <main className="reader-stage" ref={stageRef} role="main">
         {/* Áreas de toque nas laterais para mobile/desktop */}
         {mode === 'READING' && currentPage > 1 && (
           <div

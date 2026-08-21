@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BookReader } from '../src/components/BookReader/BookReader';
 import { BookManifest } from '../src/types/book';
+
+const mockUpdate = vi.fn();
+const mockDestroy = vi.fn();
+const mockFlip = vi.fn();
 
 // Mock do page-flip para ambiente jsdom
 vi.mock('page-flip', () => {
@@ -9,18 +13,19 @@ vi.mock('page-flip', () => {
     PageFlip: vi.fn().mockImplementation(() => ({
       loadFromHTML: vi.fn(),
       on: vi.fn(),
-      destroy: vi.fn(),
-      flip: vi.fn(),
+      destroy: mockDestroy,
+      flip: mockFlip,
+      update: mockUpdate,
       turnToPage: vi.fn(),
     })),
   };
 });
 
-describe('BookReader Component Integration', () => {
-  const mockBook: BookManifest = {
+describe('BookReader Component Integration with Resize & Real Assets', () => {
+  const mockRealBook: BookManifest = {
     slug: 'nico',
     title: 'Nico e as Histórias que Ele Descobriu Escutando',
-    description: 'Uma jornada sensorial incrível com o Nico.',
+    description: 'Nico acordava falando e adorava contar seus sonhos.',
     coverImage: '/books/nico/pages/01.webp',
     totalPages: 16,
     pages: Array.from({ length: 16 }, (_, i) => ({
@@ -36,43 +41,94 @@ describe('BookReader Component Integration', () => {
   });
 
   it('deve renderizar a tela de capa inicialmente com o botão Começar', () => {
-    render(<BookReader book={mockBook} />);
+    render(<BookReader book={mockRealBook} />);
 
     const titles = screen.getAllByText('Nico e as Histórias que Ele Descobriu Escutando');
     expect(titles.length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: /Começar a ler e ouvir/i })).toBeInTheDocument();
   });
 
-  it('deve transicionar para o modo de leitura ao clicar em Começar', () => {
-    render(<BookReader book={mockBook} />);
+  it('deve transicionar para o modo de leitura ao clicar em Começar', async () => {
+    render(<BookReader book={mockRealBook} />);
 
     const startButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
-    fireEvent.click(startButton);
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
 
     // Controles inferiores visíveis
     expect(screen.getByText('1 / 16')).toBeInTheDocument();
     expect(screen.getByLabelText('Próxima página')).toBeInTheDocument();
   });
 
-  it('deve navegar para a próxima página ao clicar no botão de avançar', () => {
-    render(<BookReader book={mockBook} />);
+  it('deve navegar para a próxima página ao clicar no botão de avançar', async () => {
+    render(<BookReader book={mockRealBook} />);
 
     const startButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
-    fireEvent.click(startButton);
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
 
     const nextButton = screen.getByLabelText('Próxima página');
-    fireEvent.click(nextButton);
+    await act(async () => {
+      fireEvent.click(nextButton);
+    });
 
     expect(screen.getByText('2 / 16')).toBeInTheDocument();
   });
 
-  it('deve desabilitar o botão de voltar na primeira página', () => {
-    render(<BookReader book={mockBook} />);
+  it('deve desabilitar o botão de voltar na primeira página', async () => {
+    render(<BookReader book={mockRealBook} />);
 
     const startButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
-    fireEvent.click(startButton);
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
 
     const prevButton = screen.getByLabelText('Página anterior');
     expect(prevButton).toBeDisabled();
+  });
+
+  it('deve registrar ResizeObserver ao entrar no modo de leitura e desconectar no unmount', async () => {
+    const { unmount } = render(<BookReader book={mockRealBook} />);
+
+    const startButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
+
+    // Desmonta o componente
+    unmount();
+    expect(mockDestroy).toHaveBeenCalled();
+  });
+
+  it('deve preservar a página lógica e disparar update() no redimensionamento da janela', async () => {
+    render(<BookReader book={mockRealBook} />);
+
+    const startButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
+
+    // Avança para a página 3
+    const nextButton = screen.getByLabelText('Próxima página');
+    await act(async () => {
+      fireEvent.click(nextButton);
+    });
+    await act(async () => {
+      fireEvent.click(nextButton);
+    });
+    expect(screen.getByText('3 / 16')).toBeInTheDocument();
+
+    // Simula múltiplos eventos de resize consecutivos da janela
+    await act(async () => {
+      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event('orientationchange'));
+      // Aguarda requestAnimationFrame
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    // A página atual DEVE continuar exatamente na 3 / 16
+    expect(screen.getByText('3 / 16')).toBeInTheDocument();
   });
 });
