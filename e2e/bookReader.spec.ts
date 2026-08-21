@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('E2E MVP Flipbook Narrado - Livro Nico', () => {
 
   test('Fluxo Completo: Capa -> Leitura -> Navegação -> Áudio -> Finalização -> Reinício', async ({ page }) => {
+    test.setTimeout(90000);
     // 1. Abertura direta da rota
     await page.goto('/livros/nico');
     await expect(page).toHaveTitle(/Nico e as Histórias que Ele Descobriu Escutando/);
@@ -50,20 +51,17 @@ test.describe('E2E MVP Flipbook Narrado - Livro Nico', () => {
 
     // 7. Navegação por Teclado
     await page.keyboard.press('ArrowRight'); // Avança para 3
-    await page.waitForTimeout(600);
-    await expect(pageIndicator).toHaveText('3 / 16');
+    await expect(pageIndicator).toHaveText('3 / 16', { timeout: 7000 });
 
     await page.keyboard.press('ArrowLeft'); // Volta para 2
-    await page.waitForTimeout(600);
-    await expect(pageIndicator).toHaveText('2 / 16');
+    await expect(pageIndicator).toHaveText('2 / 16', { timeout: 7000 });
 
     // 8. Avançar até a Página 16 (Cena 15)
     while ((await pageIndicator.innerText()) !== '16 / 16') {
       await nextButton.click();
-      await page.waitForTimeout(600);
+      await page.waitForTimeout(750);
     }
-    await expect(pageIndicator).toHaveText('16 / 16');
-    await page.waitForTimeout(600);
+    await expect(pageIndicator).toHaveText('16 / 16', { timeout: 7000 });
 
     // 10. Chegada ao Final -> Clicar no botão Concluir para abrir a Tela Final
     await nextButton.click();

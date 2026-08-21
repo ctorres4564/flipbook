@@ -95,40 +95,43 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     try {
       // Destrói instância anterior caso exista
       if (pageFlipInstanceRef.current) {
-        pageFlipInstanceRef.current.destroy();
+        try {
+          pageFlipInstanceRef.current.destroy();
+        } catch {
+          // ignore
+        }
         pageFlipInstanceRef.current = null;
       }
 
-      // Calcula dimensões ideais com base no container e proporção 1:1 das ilustrações
+      // Calcula dimensões ideais para exibição de página individual (1 cena por vez)
       const container = stageRef.current || flipbookContainerRef.current.parentElement;
-      const containerWidth = container?.clientWidth || window.innerWidth;
-      const containerHeight = container?.clientHeight || window.innerHeight;
-      const isLandscapeMobile = window.innerHeight <= 500;
-      const isMobile = window.innerWidth <= 768;
+      const stageWidth = container?.clientWidth || window.innerWidth;
+      const stageHeight = container?.clientHeight || window.innerHeight;
 
-      // Dimensões base quadradas com limites seguros para controles e cabeçalho
-      const marginX = isLandscapeMobile ? 12 : (isMobile ? 16 : 40);
-      const marginY = isLandscapeMobile ? 12 : (isMobile ? 80 : 60);
-      const availableSize = Math.min(
-        containerWidth - marginX,
-        containerHeight - marginY
-      );
-      const baseDimension = Math.max(180, Math.min(availableSize, 800));
+      // Margens de respiro para garantir aproveitamento máximo da tela
+      const isMobile = stageWidth <= 768;
+      const paddingX = isMobile ? 12 : 24;
+      const paddingY = isMobile ? 8 : 16;
+
+      const availWidth = Math.max(180, stageWidth - paddingX);
+      const availHeight = Math.max(180, stageHeight - paddingY);
+
+      // Cada página é uma cena individual completa com sua própria narração
+      // O tamanho ideal ocupa o maior espaço mantendo a proporção 1:1
+      const baseDimension = Math.round(Math.min(availWidth, availHeight));
+      const baseWidth = baseDimension;
+      const baseHeight = baseDimension;
 
       const pageFlip = new PageFlip(flipbookContainerRef.current, {
-        width: baseDimension,
-        height: baseDimension,
-        size: 'stretch',
-        minWidth: 160,
-        maxWidth: 1200,
-        minHeight: 160,
-        maxHeight: 1200,
+        width: baseWidth,
+        height: baseHeight,
+        size: 'fixed',
         drawShadow: true,
         flippingTime: reducedMotion ? 100 : 700,
         usePortrait: true,
         startPage: currentPage - 1,
         autoSize: true,
-        showCover: true,
+        showCover: false,
         maxShadowOpacity: 0.5,
       });
 
@@ -151,7 +154,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
 
       pageFlipInstanceRef.current = pageFlip;
 
-      // Manipulador com debounce para atualização segura de dimensões
+      // Manipulador de resize com requestAnimationFrame usando update() nativo sem destruir DOM
       const handleResize = () => {
         if (animationFrameId) {
           cancelAnimationFrame(animationFrameId);
