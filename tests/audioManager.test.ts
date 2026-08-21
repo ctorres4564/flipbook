@@ -88,4 +88,26 @@ describe('AudioManager - P0 Audio Engine', () => {
     audioManager.toggleMute();
     expect(audioManager.isMuted()).toBe(false);
   });
+
+  it('deve tratar AbortError silenciosamente como interrupção esperada sem mudar para ERROR', async () => {
+    window.HTMLMediaElement.prototype.play = vi.fn().mockRejectedValue(new DOMException('Interrupted', 'AbortError'));
+
+    const stateCallback = vi.fn();
+    audioManager.subscribe({ onStateChange: stateCallback });
+
+    await audioManager.loadAndPlay('/books/nico/audio/02.mp3');
+
+    // Não deve entrar em ERROR
+    expect(audioManager.getState()).not.toBe('ERROR');
+  });
+
+  it('deve zerar e notificar progresso no stopAndReset', () => {
+    const progressCallback = vi.fn();
+    audioManager.subscribe({ onProgress: progressCallback });
+
+    audioManager.stopAndReset();
+
+    expect(audioManager.getState()).toBe('IDLE');
+    expect(progressCallback).toHaveBeenCalledWith({ currentTime: 0, duration: 0, percentage: 0 });
+  });
 });

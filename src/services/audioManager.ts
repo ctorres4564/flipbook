@@ -134,6 +134,11 @@ export class AudioManager {
         return; // Requisição superada por nova página
       }
 
+      // Trata interrupção esperada por pausa ou cancelamento sem erro
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
+
       // Trata bloqueio de autoplay do navegador sem crash
       if (err instanceof DOMException && err.name === 'NotAllowedError') {
         this.setState('BLOCKED');
@@ -152,7 +157,10 @@ export class AudioManager {
       this.currentPlayPromise = this.audio.play();
       await this.currentPlayPromise;
       this.setState('PLAYING');
-    } catch (err) {
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
       if (err instanceof DOMException && err.name === 'NotAllowedError') {
         this.setState('BLOCKED');
       } else {
@@ -186,11 +194,15 @@ export class AudioManager {
       try {
         this.audio.pause();
         this.audio.currentTime = 0;
-      } catch (err) {
-        console.warn('Aviso ao resetar elemento de áudio:', err);
+      } catch (err: unknown) {
+        if (!(err instanceof DOMException && err.name === 'AbortError')) {
+          console.warn('Aviso ao resetar elemento de áudio:', err);
+        }
       }
     }
     this.setState('IDLE');
+    const resetProgress: AudioProgress = { currentTime: 0, duration: 0, percentage: 0 };
+    this.listeners.forEach((l) => l.onProgress?.(resetProgress));
   }
 
   public subscribe(events: AudioListenerEvents): () => void {

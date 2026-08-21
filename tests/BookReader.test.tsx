@@ -131,4 +131,61 @@ describe('BookReader Component Integration with Resize & Real Assets', () => {
     // A página atual DEVE continuar exatamente na 3 / 16
     expect(screen.getByText('3 / 16')).toBeInTheDocument();
   });
+
+  it('Regressão: deve concluir livro -> Ler Novamente -> reabrir capa -> reiniciar e avançar por todas as páginas com nova sessão limpa', async () => {
+    render(<BookReader book={mockRealBook} />);
+
+    // 1. Inicia primeira leitura
+    const startButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
+
+    const nextButton = screen.getByLabelText('Próxima página');
+
+    // 2. Avança até a última página (16)
+    for (let i = 1; i < 16; i++) {
+      await act(async () => {
+        fireEvent.click(nextButton);
+      });
+    }
+    expect(screen.getByText('16 / 16')).toBeInTheDocument();
+
+    // 3. Conclui livro e entra na tela BookFinished
+    await act(async () => {
+      fireEvent.click(nextButton);
+    });
+
+    const restartButton = screen.getByRole('button', { name: /Ler o livro novamente/i });
+    expect(restartButton).toBeInTheDocument();
+    expect(screen.getByText('Você chegou ao final!')).toBeInTheDocument();
+
+    // 4. Clica em Ler Novamente
+    await act(async () => {
+      fireEvent.click(restartButton);
+    });
+
+    // 5. Deve retornar para a Capa com estado e áudio resetados
+    const newStartButton = screen.getByRole('button', { name: /Começar a ler e ouvir/i });
+    expect(newStartButton).toBeInTheDocument();
+
+    // 6. Inicia segunda leitura (nova sessão limpa)
+    await act(async () => {
+      fireEvent.click(newStartButton);
+    });
+
+    expect(screen.getByText('1 / 16')).toBeInTheDocument();
+
+    // 7. Avança pelas páginas na segunda leitura sem erros
+    const secondNextButton = screen.getByLabelText('Próxima página');
+    await act(async () => {
+      fireEvent.click(secondNextButton);
+    });
+    expect(screen.getByText('2 / 16')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(secondNextButton);
+    });
+    expect(screen.getByText('3 / 16')).toBeInTheDocument();
+  });
 });

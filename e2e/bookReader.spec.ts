@@ -75,6 +75,64 @@ test.describe('E2E MVP Flipbook Narrado - Livro Nico', () => {
     await expect(startButton).toBeVisible();
   });
 
+  test('Regressão: Concluir Livro -> Ler Novamente -> Reabrir Leitura -> Avançar por todas as páginas', async ({ page }) => {
+    test.setTimeout(120000);
+
+    const consoleErrors: string[] = [];
+    page.on('pageerror', (err) => consoleErrors.push(err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+
+    await page.goto('/livros/nico');
+    const startButton = page.getByRole('button', { name: /Começar a ler e ouvir/i });
+    await expect(startButton).toBeVisible();
+
+    // Inicia 1ª leitura
+    await startButton.click();
+    const nextButton = page.locator('#btn-next-page');
+    const pageIndicator = page.locator('#page-indicator');
+    await expect(pageIndicator).toHaveText('1 / 16');
+
+    // Avança até o fim (página 16)
+    while ((await pageIndicator.innerText()) !== '16 / 16') {
+      await nextButton.click();
+      await page.waitForTimeout(400);
+    }
+
+    // Abre tela de finalização
+    await nextButton.click();
+    const restartBtn = page.locator('#btn-restart-book');
+    await expect(restartBtn).toBeVisible({ timeout: 5000 });
+
+    // Clica em Ler Novamente
+    await restartBtn.click();
+    await expect(startButton).toBeVisible();
+
+    // Reabre o livro para a 2ª leitura
+    await startButton.click();
+    await expect(pageIndicator).toHaveText('1 / 16');
+
+    // Verifica que a imagem da página 1 está visível e carregada
+    const firstPageImage = page.locator('.page-item img').first();
+    await expect(firstPageImage).toBeVisible();
+
+    // Avança por todas as páginas da 2ª leitura confirmando renderização de imagens e sincronia
+    while ((await pageIndicator.innerText()) !== '16 / 16') {
+      await nextButton.click();
+      await page.waitForTimeout(400);
+    }
+    await expect(pageIndicator).toHaveText('16 / 16');
+
+    // Garante que nenhum erro PageFlip.update ou crash ocorreu no console
+    const pageFlipErrors = consoleErrors.filter((msg) =>
+      msg.includes('PageFlip.update') || msg.includes('Cannot read properties of undefined')
+    );
+    expect(pageFlipErrors).toEqual([]);
+  });
+
   test('Áudio: Casos Críticos de Concorrência e Troca Rápida', async ({ page }) => {
     await page.goto('/livros/nico');
     await page.getByRole('button', { name: /Começar a ler e ouvir/i }).click();

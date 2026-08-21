@@ -23,6 +23,7 @@ interface BookReaderProps {
 
 export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   const [mode, setMode] = useState<ReaderMode>('COVER');
+  const [sessionKey, setSessionKey] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [audioState, setAudioState] = useState<AudioState>('IDLE');
   const [audioProgress, setAudioProgress] = useState<AudioProgress | null>(null);
@@ -92,17 +93,23 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     let resizeObserver: ResizeObserver | null = null;
     let animationFrameId: number | null = null;
 
-    try {
-      // Destrói instância anterior caso exista
-      if (pageFlipInstanceRef.current) {
-        try {
-          pageFlipInstanceRef.current.destroy();
-        } catch {
-          // ignore
-        }
-        pageFlipInstanceRef.current = null;
+    // Destrói instância anterior caso exista
+    if (pageFlipInstanceRef.current) {
+      try {
+        pageFlipInstanceRef.current.destroy();
+      } catch {
+        // ignore
       }
+      pageFlipInstanceRef.current = null;
+    }
 
+    // Garante que todas as páginas estejam devidamente montadas no DOM
+    const pageElements = flipbookContainerRef.current.querySelectorAll<HTMLElement>('.page-item');
+    if (pageElements.length < book.pages.length) {
+      return;
+    }
+
+    try {
       // Calcula dimensões ideais para exibição de página individual (1 cena por vez)
       const container = stageRef.current || flipbookContainerRef.current.parentElement;
       const stageWidth = container?.clientWidth || window.innerWidth;
@@ -136,10 +143,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       });
 
       // Carrega elementos HTML das páginas
-      const pageElements = flipbookContainerRef.current.querySelectorAll('.page-item');
-      if (pageElements.length > 0) {
-        pageFlip.loadFromHTML(pageElements as unknown as NodeListOf<HTMLElement>);
-      }
+      pageFlip.loadFromHTML(pageElements as unknown as NodeListOf<HTMLElement>);
 
       // Sincroniza virada física com estado lógico React
       pageFlip.on('flip', (e: { data: number }) => {
@@ -160,7 +164,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           cancelAnimationFrame(animationFrameId);
         }
         animationFrameId = requestAnimationFrame(() => {
-          if (pageFlipInstanceRef.current) {
+          if (pageFlipInstanceRef.current && typeof pageFlipInstanceRef.current.update === 'function') {
             try {
               pageFlipInstanceRef.current.update();
             } catch (err) {
@@ -179,30 +183,31 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       window.addEventListener('resize', handleResize);
       window.addEventListener('orientationchange', handleResize);
 
+      return () => {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+          resizeObserver = null;
+        }
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleResize);
+
+        if (pageFlipInstanceRef.current) {
+          try {
+            pageFlipInstanceRef.current.destroy();
+          } catch {
+            // cleanup seguro
+          }
+          pageFlipInstanceRef.current = null;
+        }
+      };
     } catch (err) {
       console.warn('Inicialização do PageFlip:', err);
     }
-
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener('resize', () => {});
-      window.removeEventListener('orientationchange', () => {});
-
-      if (pageFlipInstanceRef.current) {
-        try {
-          pageFlipInstanceRef.current.destroy();
-        } catch {
-          // cleanup seguro
-        }
-        pageFlipInstanceRef.current = null;
-      }
-    };
-  }, [mode, reducedMotion, book.totalPages]);
+  }, [mode, reducedMotion, book.totalPages, sessionKey]);
 
   // Ações de navegação
   const goToPage = useCallback(
@@ -264,11 +269,24 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     setCurrentPage(1);
   };
 
-  // Ler Novamente
+  // Ler Novamente: reseta estado de áudio, destrói com segurança instância antiga e remonta DOM com nova sessionKey
   const handleRestartBook = () => {
     globalAudioManager.stopAndReset();
-    setMode('COVER');
+    setAudioState('IDLE');
+    setAudioProgress(null);
+
+    if (pageFlipInstanceRef.current) {
+      try {
+        pageFlipInstanceRef.current.destroy();
+      } catch {
+        // cleanup seguro
+      }
+      pageFlipInstanceRef.current = null;
+    }
+
+    setSessionKey((prev) => prev + 1);
     setCurrentPage(1);
+    setMode('COVER');
   };
 
   // Controles de Áudio
@@ -342,12 +360,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           </div>
         )}
 
-        {/* Container do StPageFlip */}
-        <div className="flipbook-wrapper">
+        {/* Container do StPageFlip com remonte completo do DOM isolado por sessionKey */}
+        <div className="flipbook-wrapper" key={sessionKey}>
           <div className="flipbook-container" ref={flipbookContainerRef}>
             {book.pages.map((page) => (
               <BookPage
-                key={page.pageNumber}
+                key={`s${sessionKey}-p${page.pageNumber}`}
                 page={page}
                 totalPages={book.totalPages}
               />
