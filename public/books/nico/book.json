@@ -1,0 +1,107 @@
+{
+  "slug": "nico",
+  "title": "Nico e as Histórias que Ele Descobriu Escutando",
+  "description": "Uma jornada poética e sensorial onde Nico descobre os sons, segredos e maravilhas do mundo ao seu redor.",
+  "author": "Autoria Coletiva",
+  "illustrator": "Estúdio Flipbook Narrado",
+  "coverImage": "/books/nico/pages/01.webp",
+  "totalPages": 16,
+  "pages": [
+    {
+      "pageNumber": 1,
+      "image": "/books/nico/pages/01.webp",
+      "audio": null,
+      "alt": "Capa do livro: Nico com fones de ouvido coloridos em meio a ondas sonoras e natureza mágica."
+    },
+    {
+      "pageNumber": 2,
+      "image": "/books/nico/pages/02.webp",
+      "audio": "/books/nico/audio/02.mp3",
+      "alt": "Página 2: Nico acorda pela manhã escutando o canto suave dos passarinhos na janela."
+    },
+    {
+      "pageNumber": 3,
+      "image": "/books/nico/pages/03.webp",
+      "audio": "/books/nico/audio/03.mp3",
+      "alt": "Página 3: O barulho do vento soprando entre as folhas da grande árvore do quintal."
+    },
+    {
+      "pageNumber": 4,
+      "image": "/books/nico/pages/04.webp",
+      "audio": "/books/nico/audio/04.mp3",
+      "alt": "Página 4: O som das gotas de chuva batendo ritmadas no telhado de madeira."
+    },
+    {
+      "pageNumber": 5,
+      "image": "/books/nico/pages/05.webp",
+      "audio": "/books/nico/audio/05.mp3",
+      "alt": "Página 5: Nico caminha na calçada e escuta os passos apressados e alegres das pessoas."
+    },
+    {
+      "pageNumber": 6,
+      "image": "/books/nico/pages/06.webp",
+      "audio": "/books/nico/audio/06.mp3",
+      "alt": "Página 6: Um riacho cristalino corre entre pedras arredondadas fazendo uma melodia suave."
+    },
+    {
+      "pageNumber": 7,
+      "image": "/books/nico/pages/07.webp",
+      "audio": "/books/nico/audio/07.mp3",
+      "alt": "Página 7: Nico encontra um gato ronronando baixinho na cerca florida."
+    },
+    {
+      "pageNumber": 8,
+      "image": "/books/nico/pages/08.webp",
+      "audio": "/books/nico/audio/08.mp3",
+      "alt": "Página 8: O apito distante do trem corta as colinas verdejantes ao entardecer."
+    },
+    {
+      "pageNumber": 9,
+      "image": "/books/nico/pages/09.webp",
+      "audio": "/books/nico/audio/09.mp3",
+      "alt": "Página 9: Crianças brincando na praça, risadas e o bater de palmas compassado."
+    },
+    {
+      "pageNumber": 10,
+      "image": "/books/nico/pages/10.webp",
+      "audio": "/books/nico/audio/10.mp3",
+      "alt": "Página 10: Uma música suave sai pela janela de uma casa antiga com cortinas de renda."
+    },
+    {
+      "pageNumber": 11,
+      "image": "/books/nico/pages/11.webp",
+      "audio": "/books/nico/audio/11.mp3",
+      "alt": "Página 11: Os grilos começam sua sinfonia noturna quando as primeiras estrelas surgem."
+    },
+    {
+      "pageNumber": 12,
+      "image": "/books/nico/pages/12.webp",
+      "audio": "/books/nico/audio/12.mp3",
+      "alt": "Página 12: O som do mar calmo com pequenas ondas quebrando na areia fofa."
+    },
+    {
+      "pageNumber": 13,
+      "image": "/books/nico/pages/13.webp",
+      "audio": "/books/nico/audio/13.mp3",
+      "alt": "Página 13: Nico fecha os olhos e percebe o pulsar tranquilo de seu próprio coração."
+    },
+    {
+      "pageNumber": 14,
+      "image": "/books/nico/pages/14.webp",
+      "audio": "/books/nico/audio/14.mp3",
+      "alt": "Página 14: Cada som conta uma história que só quem sabe escutar consegue ver."
+    },
+    {
+      "pageNumber": 15,
+      "image": "/books/nico/pages/15.webp",
+      "audio": "/books/nico/audio/15.mp3",
+      "alt": "Página 15: Nico anota em seu caderno encantado todos os sons que descobriu no dia."
+    },
+    {
+      "pageNumber": 16,
+      "image": "/books/nico/pages/16.webp",
+      "audio": "/books/nico/audio/16.mp3",
+      "alt": "Página 16: Nico adormece sorrindo, embalado pelo silêncio carinhoso da noite."
+    }
+  ]
+}

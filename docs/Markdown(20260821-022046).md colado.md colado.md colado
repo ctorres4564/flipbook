@@ -1,0 +1,528 @@
+# PRD — Flipbook Narrado
+
+**Versão:** 1.0
+**Produto:** aplicação web para publicação de livros digitais ilustrados com narração sincronizada por página
+**MVP de referência:** *Nico e as Histórias que Ele Descobriu Escutando*
+
+---
+
+## 1. Visão do produto
+
+Aplicação web que transforma páginas ilustradas e arquivos de áudio em um **livro digital narrado e interativo**, acessível diretamente pelo navegador.
+
+O leitor abre um link, vê a capa e percorre o livro página por página. Cada página pode possuir sua própria narração, iniciada automaticamente ou por comando do leitor.
+
+O produto elimina a dependência de serviços de flipbook por assinatura, como o Publuu.
+
+---
+
+## 2. Problema
+
+Plataformas de flipbook multimídia apresentam três limitações relevantes:
+
+- cobrança recorrente para manter publicações acessíveis;
+- dependência da plataforma para hospedar os livros;
+- recursos e experiência de leitura definidos pelo fornecedor.
+
+Para livros infantis narrados, a necessidade técnica é relativamente simples: **página + áudio + navegação + experiência visual de livro**.
+
+---
+
+## 3. Objetivo do MVP
+
+Construir uma aplicação capaz de publicar o livro do Nico com:
+
+**16 páginas + narração individual + efeito de livro + experiência responsiva.**
+
+O MVP estará validado quando uma pessoa receber um link e conseguir ler e ouvir o livro integralmente sem instalar aplicativo ou criar conta.
+
+---
+
+# 4. Experiência do leitor
+
+## 4.1 Entrada
+
+Ao acessar o link, o leitor encontra:
+
+- capa do livro;
+- título;
+- botão **“Começar”**.
+
+O navegador não deve iniciar áudio antes da primeira interação do usuário, devido às políticas de autoplay dos navegadores.
+
+Depois de tocar em **Começar**, a experiência de leitura é iniciada.
+
+---
+
+## 4.2 Leitura
+
+A interface deve privilegiar o próprio livro.
+
+Elementos principais:
+
+```text
+            TÍTULO DO LIVRO
+
+       ┌─────────────────────┐
+       │                     │
+       │       PÁGINA        │
+       │                     │
+       │                     │
+       └─────────────────────┘
+
+        ◀       3 / 16       ▶
+
+             🔊  ⛶
+```
+
+Em telas maiores poderá haver visualização de duas páginas, desde que isso não prejudique a legibilidade.
+
+---
+
+# 5. Navegação
+
+O leitor poderá:
+
+- avançar página;
+- voltar página;
+- clicar/tocar nas laterais;
+- usar setas do teclado no desktop;
+- usar gesto horizontal no celular;
+- entrar em tela cheia.
+
+A aplicação nunca deverá permitir avançar além da última página ou retroceder antes da capa.
+
+---
+
+# 6. Sistema de áudio
+
+Cada página poderá ter um arquivo de áudio próprio.
+
+Exemplo:
+
+```text
+page-01 → sem áudio
+page-02 → page-02.mp3
+page-03 → page-03.mp3
+...
+page-16 → page-16.mp3
+```
+
+## Comportamento
+
+Quando uma página narrada for aberta:
+
+1. interromper imediatamente o áudio anterior;
+2. zerar o áudio anterior;
+3. carregar a narração correspondente;
+4. iniciar a reprodução, quando permitido pelo navegador.
+
+Ao mudar novamente de página, o processo se repete.
+
+---
+
+## 6.1 Controles
+
+O leitor poderá:
+
+- pausar;
+- continuar;
+- reiniciar;
+- ativar/desativar som.
+
+Não haverá dois áudios tocando simultaneamente.
+
+---
+
+# 7. Virada de página
+
+O MVP deve reproduzir visualmente a sensação de um livro.
+
+Requisitos:
+
+- animação suave;
+- sombra;
+- profundidade discreta;
+- suporte a mouse e toque;
+- desempenho adequado em celulares.
+
+Biblioteca candidata:
+
+**StPageFlip / page-flip**
+
+A biblioteca não deverá controlar a lógica de áudio. Navegação visual e reprodução sonora devem permanecer desacopladas.
+
+---
+
+# 8. Mobile-first
+
+O produto deve funcionar prioritariamente em:
+
+- smartphones;
+- tablets;
+- notebooks;
+- desktops.
+
+No celular, o livro deve utilizar a maior área possível da tela.
+
+Não deve haver necessidade de zoom manual para compreender a página.
+
+---
+
+# 9. Estrutura dos livros
+
+O conteúdo de cada livro não deverá ficar codificado diretamente nos componentes.
+
+Exemplo:
+
+```json
+{
+  "slug": "nico",
+  "title": "Nico e as Histórias que Ele Descobriu Escutando",
+  "pages": [
+    {
+      "image": "/books/nico/pages/01.webp",
+      "audio": null
+    },
+    {
+      "image": "/books/nico/pages/02.webp",
+      "audio": "/books/nico/audio/02.mp3"
+    }
+  ]
+}
+```
+
+Isso permitirá reutilizar o mesmo leitor para outros livros.
+
+---
+
+# 10. Estrutura de arquivos
+
+Exemplo:
+
+```text
+/books
+   /nico
+      book.json
+
+      /pages
+         01.webp
+         02.webp
+         ...
+         16.webp
+
+      /audio
+         02.mp3
+         03.mp3
+         ...
+         16.mp3
+```
+
+Adicionar um novo livro não deverá exigir alteração da engine de leitura.
+
+---
+
+# 11. URLs
+
+Cada livro terá endereço próprio.
+
+Exemplo:
+
+```text
+/livros/nico
+```
+
+Posteriormente:
+
+```text
+/livros/nico
+/livros/luna
+/livros/o-dragao-azul
+```
+
+---
+
+# 12. Interface do MVP
+
+A interface terá apenas:
+
+- capa;
+- livro;
+- anterior;
+- próxima;
+- indicador de página;
+- controle de áudio;
+- tela cheia.
+
+Evitar menus, barras laterais e elementos que desviem a atenção da história.
+
+---
+
+# 13. Tela final
+
+Após a última página, poderá aparecer uma ação discreta:
+
+**“Ler novamente”**
+
+Ela retorna à capa e reinicia o estado do livro.
+
+---
+
+# 14. Acessibilidade
+
+Implementar no MVP:
+
+- navegação por teclado;
+- `aria-label` nos controles;
+- foco visível;
+- contraste adequado;
+- respeito a `prefers-reduced-motion`;
+- alternativa textual configurável para cada página;
+- controles de áudio acessíveis.
+
+A animação de página deve ser reduzida ou eliminada quando o sistema operacional solicitar redução de movimento.
+
+---
+
+# 15. Performance
+
+Meta:
+
+**primeira página visível rapidamente mesmo em conexão móvel.**
+
+Estratégia:
+
+- páginas em WebP/AVIF;
+- lazy loading;
+- preload apenas da próxima página;
+- preload controlado do próximo áudio;
+- cache estático;
+- imagens dimensionadas corretamente.
+
+Não carregar todas as imagens e todos os áudios imediatamente.
+
+---
+
+# 16. Arquitetura proposta
+
+### Frontend
+
+**React + TypeScript + Vite**
+
+Para o MVP, não há necessidade arquitetural de Next.js.
+
+### Flipbook
+
+**StPageFlip**, se passar nos testes mobile e de acessibilidade.
+
+### Conteúdo
+
+JSON estruturado por livro.
+
+### Assets
+
+Arquivos estáticos inicialmente.
+
+### Hospedagem
+
+**Vercel**.
+
+### Backend
+
+**Nenhum no MVP.**
+
+### Banco de dados
+
+**Nenhum no MVP.**
+
+### Autenticação
+
+**Nenhuma no MVP.**
+
+Isso reduz drasticamente complexidade, custo e superfície de segurança.
+
+---
+
+# 17. Analytics
+
+Implementação opcional, mas recomendada desde o início.
+
+Eventos mínimos:
+
+```text
+book_opened
+book_started
+page_viewed
+audio_started
+audio_completed
+book_completed
+book_restarted
+```
+
+Isso permitirá descobrir, por exemplo, quantos leitores começam o livro e quantos chegam à página 16.
+
+Não coletar dados pessoais de crianças.
+
+---
+
+# 18. Privacidade
+
+O MVP não deverá:
+
+- solicitar nome da criança;
+- solicitar idade;
+- criar perfil infantil;
+- registrar voz;
+- utilizar câmera;
+- coletar informações pessoais.
+
+Se analytics forem utilizados, deverão ser minimizados e preferencialmente anônimos/agregados.
+
+Isso é particularmente importante por se tratar de conteúdo destinado a crianças.
+
+---
+
+# 19. Painel administrativo
+
+**Fora do MVP.**
+
+Na primeira versão, novos livros serão adicionados diretamente ao projeto.
+
+Depois da validação poderá ser criado um painel:
+
+```text
+Novo livro
+
+Título
+Capa
+Páginas
+Áudios
+Descrição
+
+[PUBLICAR]
+```
+
+Mas construir isso agora adicionaria backend, armazenamento, autenticação e segurança sem necessidade para validar o produto.
+
+---
+
+# 20. Critérios de aceitação do MVP
+
+O MVP somente estará concluído quando:
+
+- o livro do Nico possuir exatamente 16 páginas;
+- todas forem exibidas corretamente;
+- cada narração estiver associada à página correta;
+- mudar de página interromper o áudio anterior;
+- nenhuma narração tocar simultaneamente com outra;
+- navegação funcionar por toque, mouse e teclado;
+- funcionar adequadamente em celular e desktop;
+- tela cheia funcionar quando suportada;
+- recarregar a página não quebrar o leitor;
+- acesso ocorrer por URL pública;
+- nenhuma conta for necessária;
+- não houver dependência do Publuu para leitura.
+
+---
+
+# 21. Testes obrigatórios
+
+### Funcionais
+
+Testar:
+
+- primeira página;
+- última página;
+- avançar;
+- voltar;
+- áudio;
+- pausa;
+- troca rápida de páginas;
+- reinício;
+- autoplay bloqueado pelo navegador.
+
+### Responsividade
+
+Testar pelo menos:
+
+- Chrome desktop;
+- Chrome Android;
+- Safari iPhone/iPad;
+- Edge desktop.
+
+### Casos críticos
+
+Especialmente:
+
+```text
+virar página durante narração
+virar várias páginas rapidamente
+voltar para página já narrada
+pausar e avançar
+perder conexão durante áudio
+recarregar durante leitura
+```
+
+---
+
+# 22. Fora do escopo da v1
+
+Não implementar agora:
+
+- login;
+- cadastro;
+- pagamentos;
+- biblioteca pessoal;
+- favoritos;
+- comentários;
+- IA;
+- geração automática de livros;
+- editor de páginas;
+- upload pelo usuário;
+- painel administrativo;
+- DRM;
+- aplicativo Android/iOS.
+
+Primeiro deve funcionar **muito bem como leitor narrado**.
+
+---
+
+# 23. Evolução possível
+
+Se o Nico validar a experiência, a arquitetura poderá evoluir para uma plataforma de publicação:
+
+```text
+                  PLATAFORMA
+
+                      │
+              ┌───────┴───────┐
+              │               │
+          Biblioteca        Editor
+              │               │
+         ┌────┼────┐      Upload PDF
+         │    │    │      Upload áudio
+       Nico Livro2 Livro3       │
+                                │
+                             Publicar
+```
+
+Nesse estágio, o produto deixa de ser apenas o leitor do Nico e passa a ser uma **plataforma própria de livros digitais narrados**.
+
+---
+
+## Decisão arquitetural central
+
+Eu desenvolveria a **engine reutilizável desde o primeiro commit**, mas entregaria somente **um livro: Nico**.
+
+Isso evita dois erros opostos:
+
+**não** criar código descartável específico para um único livro;
+
+**não** construir antecipadamente uma plataforma inteira sem saber se haverá outros livros.
+
+O primeiro marco deve ser muito objetivo:
+
+> **Abrir** **`/livros/nico`** **no celular, tocar em “Começar”, ouvir a história e chegar à página 16 com uma experiência melhor ou equivalente à do Publuu.**
+
+**Planejamento:** GPT-5.6 Sol | Raciocínio: alto
+**Execução:** GPT-5.6 Terra | Raciocínio: médio
