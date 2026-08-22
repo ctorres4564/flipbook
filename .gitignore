@@ -29,6 +29,10 @@ playwright-report/
 test-results/
 blob-report/
 
+# Large raw media assets (exceeds GitHub 100MB limit)
+livro_nico/assets/novas_imagens/
+*.pdf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

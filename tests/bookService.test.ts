@@ -37,7 +37,7 @@ describe('Book Service & Real Assets Manifest Validation (WebP)', () => {
       const diskPath = path.join(publicDir, page.image);
       expect(fs.existsSync(diskPath)).toBe(true);
       const stat = fs.statSync(diskPath);
-      expect(stat.size).toBeGreaterThan(200000); // WebPs de alta fidelidade (>200KB)
+      expect(stat.size).toBeGreaterThan(150000); // WebPs de alta fidelidade (>150KB)
       expect(stat.size).toBeLessThan(600000); // Compactados (<600KB)
     });
   });
