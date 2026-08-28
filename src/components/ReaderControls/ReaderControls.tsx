@@ -9,8 +9,13 @@ import {
   VolumeX,
   Maximize2,
   Minimize2,
+  List,
+  Download,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { AudioState, AudioProgress } from '../../types/audio';
+import { SpeechState } from '../../services/speechService';
 
 interface ReaderControlsProps {
   currentPage: number;
@@ -18,15 +23,21 @@ interface ReaderControlsProps {
   audioState: AudioState;
   audioProgress: AudioProgress | null;
   hasAudioOnCurrentPage: boolean;
+  speechState?: SpeechState;
+  hasSpeechOnCurrentPage?: boolean;
   isMuted: boolean;
   isFullscreen: boolean;
   isFullscreenAvailable: boolean;
+  isZoomed?: boolean;
+  pdfUrl?: string;
   onPrevPage: () => void;
   onNextPage: () => void;
   onTogglePlay: () => void;
   onRestartAudio: () => void;
   onToggleMute: () => void;
   onToggleFullscreen: () => void;
+  onToggleToc: () => void;
+  onToggleZoom?: () => void;
 }
 
 export const ReaderControls: React.FC<ReaderControlsProps> = ({
@@ -35,22 +46,30 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
   audioState,
   audioProgress,
   hasAudioOnCurrentPage,
+  speechState = 'IDLE',
+  hasSpeechOnCurrentPage = false,
   isMuted,
   isFullscreen,
   isFullscreenAvailable,
+  isZoomed = false,
+  pdfUrl,
   onPrevPage,
   onNextPage,
   onTogglePlay,
   onRestartAudio,
   onToggleMute,
   onToggleFullscreen,
+  onToggleToc,
+  onToggleZoom,
 }) => {
-  const isPlaying = audioState === 'PLAYING';
-  const isAudioDisabled = !hasAudioOnCurrentPage || audioState === 'ERROR';
+  const isPlayingAudio = audioState === 'PLAYING';
+  const isSpeakingSpeech = speechState === 'SPEAKING';
+  const isPlayingAny = isPlayingAudio || isSpeakingSpeech;
+  const isAudioAvailable = hasAudioOnCurrentPage || hasSpeechOnCurrentPage;
 
   return (
     <footer className="reader-footer" role="toolbar" aria-label="Controles de Leitura e Áudio">
-      {/* Barra fixa de progresso de áudio da página para evitar qualquer salto de layout */}
+      {/* Barra de progresso visual */}
       <div
         className="audio-progress-bar-container"
         role="progressbar"
@@ -58,7 +77,12 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Progresso da narração"
-        style={{ visibility: hasAudioOnCurrentPage && audioProgress && audioProgress.duration > 0 ? 'visible' : 'hidden' }}
+        style={{
+          visibility:
+            hasAudioOnCurrentPage && audioProgress && audioProgress.duration > 0
+              ? 'visible'
+              : 'hidden',
+        }}
       >
         <div
           className="audio-progress-bar-fill"
@@ -67,6 +91,18 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
       </div>
 
       <div className="controls-group">
+        {/* Abrir Sumário / Índice */}
+        <button
+          type="button"
+          id="btn-toc"
+          onClick={onToggleToc}
+          className="control-btn"
+          aria-label="Abrir sumário e miniaturas"
+          title="Sumário e miniaturas (Índice)"
+        >
+          <List size={20} />
+        </button>
+
         {/* Página Anterior */}
         <button
           type="button"
@@ -80,47 +116,44 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
           <ChevronLeft size={22} />
         </button>
 
-        {/* Play / Pause Áudio */}
+        {/* Ouvir Leitura em Voz Alta / Áudio */}
         <button
           type="button"
           id="btn-play-pause"
           onClick={onTogglePlay}
-          disabled={isAudioDisabled}
-          className={`control-btn primary ${isPlaying ? 'playing' : ''}`}
-          aria-label={isPlaying ? 'Pausar narração' : 'Ouvir narração da página'}
-          title={isPlaying ? 'Pausar narração' : 'Reproduzir narração'}
+          disabled={!isAudioAvailable}
+          className={`control-btn primary ${isPlayingAny ? 'playing' : ''}`}
+          aria-label={isPlayingAny ? 'Pausar leitura da página' : 'Ouvir leitura da página'}
+          title={isPlayingAny ? 'Pausar leitura' : 'Ouvir leitura da página (pt-BR)'}
         >
-          {isPlaying ? <Pause size={24} /> : <Play size={24} style={{ marginLeft: 2 }} />}
+          {isPlayingAny ? <Pause size={22} /> : <Play size={22} style={{ marginLeft: 2 }} />}
         </button>
 
-        {/* Reiniciar Áudio */}
+        {/* Reiniciar Leitura / Áudio */}
+        {hasAudioOnCurrentPage && (
+          <button
+            type="button"
+            id="btn-restart-audio"
+            onClick={onRestartAudio}
+            disabled={!isAudioAvailable}
+            className="control-btn"
+            aria-label="Reiniciar narração da página"
+            title="Reiniciar áudio da página"
+          >
+            <RotateCcw size={18} />
+          </button>
+        )}
+
+        {/* Indicador de Página (clicável para abrir sumário) */}
         <button
           type="button"
-          id="btn-restart-audio"
-          onClick={onRestartAudio}
-          disabled={isAudioDisabled}
-          className="control-btn"
-          aria-label="Reiniciar narração da página"
-          title="Reiniciar narração"
+          className="page-indicator"
+          id="page-indicator"
+          onClick={onToggleToc}
+          aria-label={`Página ${currentPage} de ${totalPages}. Clique para ver sumário`}
+          title="Clique para escolher uma página"
         >
-          <RotateCcw size={18} />
-        </button>
-
-        {/* Indicador de Página */}
-        <div className="page-indicator" id="page-indicator" aria-live="polite" aria-atomic="true">
           {currentPage} / {totalPages}
-        </div>
-
-        {/* Mute / Unmute */}
-        <button
-          type="button"
-          id="btn-toggle-mute"
-          onClick={onToggleMute}
-          className={`control-btn ${isMuted ? 'muted' : ''}`}
-          aria-label={isMuted ? 'Ativar som' : 'Desativar som'}
-          title={isMuted ? 'Ativar som' : 'Desativar som'}
-        >
-          {isMuted ? <VolumeX size={20} color="#f43f5e" /> : <Volume2 size={20} />}
         </button>
 
         {/* Próxima Página / Concluir */}
@@ -136,7 +169,49 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
           <ChevronRight size={22} />
         </button>
 
-        {/* Tela Cheia (apenas se suportado) */}
+        {/* Zoom / Modo Lupa */}
+        {onToggleZoom && (
+          <button
+            type="button"
+            id="btn-toggle-zoom"
+            onClick={onToggleZoom}
+            className={`control-btn ${isZoomed ? 'active' : ''}`}
+            aria-label={isZoomed ? 'Diminuir zoom' : 'Aumentar zoom da página'}
+            title={isZoomed ? 'Ajustar à tela' : 'Ampliar detalhes'}
+          >
+            {isZoomed ? <ZoomOut size={19} /> : <ZoomIn size={19} />}
+          </button>
+        )}
+
+        {/* Mute / Unmute (se houver áudio pré-gravado) */}
+        {hasAudioOnCurrentPage && (
+          <button
+            type="button"
+            id="btn-toggle-mute"
+            onClick={onToggleMute}
+            className={`control-btn ${isMuted ? 'muted' : ''}`}
+            aria-label={isMuted ? 'Ativar som' : 'Desativar som'}
+            title={isMuted ? 'Ativar som' : 'Desativar som'}
+          >
+            {isMuted ? <VolumeX size={19} color="#f43f5e" /> : <Volume2 size={19} />}
+          </button>
+        )}
+
+        {/* Download do PDF */}
+        {pdfUrl && (
+          <a
+            href={pdfUrl}
+            download="Cartilha-Engasgo-Idosos-Sonia-Torres.pdf"
+            className="control-btn"
+            aria-label="Baixar cartilha em PDF"
+            title="Baixar arquivo PDF original"
+            style={{ textDecoration: 'none' }}
+          >
+            <Download size={19} />
+          </a>
+        )}
+
+        {/* Tela Cheia */}
         {isFullscreenAvailable && (
           <button
             type="button"
@@ -146,7 +221,7 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
             aria-label={isFullscreen ? 'Sair da tela cheia' : 'Entrar em tela cheia'}
             title="Tela cheia"
           >
-            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            {isFullscreen ? <Minimize2 size={19} /> : <Maximize2 size={19} />}
           </button>
         )}
       </div>

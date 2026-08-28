@@ -1,0 +1,190 @@
+{
+  "slug": "cartilha-engasgo",
+  "title": "Engasgo em Idosos Durante as Refeições",
+  "subtitle": "Série Para Quem Cuida — 1ª Edição",
+  "author": "Sônia Torres",
+  "credentials": "Fonoaudióloga — CRFa 1-17701",
+  "description": "Material educativo e prático para quem cuida de uma pessoa idosa em casa. Orientações sobre segurança na alimentação, sinais de alerta de disfagia, posicionamento correto e momento de buscar avaliação fonoaudiológica.",
+  "coverImage": "/books/cartilha-engasgo/pages/01.webp",
+  "pdfUrl": "/books/cartilha-engasgo/cartilha-engasgo-idosos.pdf",
+  "totalPages": 17,
+  "aspectRatio": "portrait",
+  "pageDimensions": {
+    "width": 420,
+    "height": 595
+  },
+  "topics": [
+    { "title": "Capa", "pageNumber": 1, "section": "Apresentação" },
+    { "title": "Esta cartilha é para você", "pageNumber": 2, "section": "Sobre esta cartilha" },
+    { "title": "O que a cartilha NÃO ensina", "pageNumber": 3, "section": "Sobre esta cartilha" },
+    { "title": "O que é engasgo e por que acontece", "pageNumber": 4, "section": "Como o engasgo acontece" },
+    { "title": "Por que acontece com idosos", "pageNumber": 5, "section": "Como o engasgo acontece" },
+    { "title": "Sinais durante a refeição", "pageNumber": 6, "section": "Sinais de alerta" },
+    { "title": "Mais sinais para observar", "pageNumber": 7, "section": "Sinais de alerta" },
+    { "title": "Sinais no dia a dia", "pageNumber": 8, "section": "Sinais de alerta" },
+    { "title": "Preparando o ambiente", "pageNumber": 9, "section": "Preparando a refeição" },
+    { "title": "A posição correta (Postura)", "pageNumber": 10, "section": "Preparando a refeição" },
+    { "title": "O ritmo e a quantidade", "pageNumber": 11, "section": "Durante a refeição" },
+    { "title": "Atenção e pós-refeição", "pageNumber": 12, "section": "Durante a refeição" },
+    { "title": "Se a pessoa engasgar", "pageNumber": 13, "section": "Em caso de engasgo" },
+    { "title": "Sem receita pronta sobre comida", "pageNumber": 14, "section": "Sobre a alimentação" },
+    { "title": "Quando procurar fonoaudiólogo", "pageNumber": 15, "section": "Ajuda profissional" },
+    { "title": "Como encontrar fonoaudiólogo", "pageNumber": 16, "section": "Ajuda profissional" },
+    { "title": "Responsabilidade técnica", "pageNumber": 17, "section": "Sobre esta edição" }
+  ],
+  "pages": [
+    {
+      "pageNumber": 1,
+      "image": "/books/cartilha-engasgo/pages/01.webp",
+      "audio": null,
+      "title": "Capa: Engasgo em Idosos Durante as Refeições",
+      "section": "Apresentação",
+      "alt": "Capa da cartilha: Série Para Quem Cuida, Primeira Edição - Engasgo em Idosos Durante as Refeições. Material educativo para quem cuida de uma pessoa idosa em casa.",
+      "speechText": "Série Para Quem Cuida. Primeira Edição. Engasgo em Idosos Durante as Refeições. Material educativo para quem cuida de uma pessoa idosa em casa."
+    },
+    {
+      "pageNumber": 2,
+      "image": "/books/cartilha-engasgo/pages/02.webp",
+      "audio": null,
+      "title": "Esta cartilha é para você",
+      "section": "Sobre esta cartilha",
+      "alt": "Página 2: Esta cartilha é para você. Orientações sobre o papel do cuidador e o que será encontrado na cartilha.",
+      "speechText": "Sobre esta cartilha: Esta cartilha é para você. Esta cartilha foi feita para você que cuida de uma pessoa idosa em casa. Sabemos que cuidar não é fácil. Muitas vezes, você também é idoso. Muitas vezes, está cansado. E quando a pessoa engasga na hora de comer, bate aquele medo. Aqui você vai encontrar informações para: Observar melhor o que acontece na hora da refeição; Saber quando procurar ajuda de um profissional; Preparar o ambiente para a refeição ser mais segura."
+    },
+    {
+      "pageNumber": 3,
+      "image": "/books/cartilha-engasgo/pages/03.webp",
+      "audio": null,
+      "title": "O que esta cartilha NÃO vai ensinar",
+      "section": "Sobre esta cartilha",
+      "alt": "Página 3: O que esta cartilha NÃO vai ensinar. Esclarecimento sobre desengasgo emergencial, tratamentos e dietas que exigem fonoaudiólogo.",
+      "speechText": "Sobre esta cartilha: O que esta cartilha NÃO vai ensinar. Como desengasgar alguém em uma emergência; Como tratar problemas de engasgo; Qual comida ou bebida dar. Para tudo isso, você precisa de uma avaliação individual com um fonoaudiólogo. Cada pessoa é diferente. Esta cartilha serve para você observar e saber quando buscar ajuda profissional."
+    },
+    {
+      "pageNumber": 4,
+      "image": "/books/cartilha-engasgo/pages/04.webp",
+      "audio": null,
+      "title": "O que é engasgo e por que acontece",
+      "section": "Como o engasgo acontece",
+      "alt": "Página 4: O que é engasgo e por que acontece. Diagrama anatômico comparando a deglutição normal e a entrada de alimento na traqueia.",
+      "speechText": "Como o engasgo acontece: O que é engasgo e por que acontece. Quando a gente come ou bebe, o alimento faz um caminho pelo corpo até chegar no estômago. O engasgo acontece quando: O alimento ou líquido tenta entrar pela porta errada; O corpo reage para proteger o pulmão; A pessoa tosse, engasga, fica sem ar."
+    },
+    {
+      "pageNumber": 5,
+      "image": "/books/cartilha-engasgo/pages/05.webp",
+      "audio": null,
+      "title": "Por que isso pode acontecer com idosos",
+      "section": "Como o engasgo acontece",
+      "alt": "Página 5: Por que isso pode acontecer com idosos. Fatores musculares, neurológicos e dentários.",
+      "speechText": "Como o engasgo acontece: Por que isso pode acontecer com idosos. Os músculos da boca e da garganta ficam mais fracos com o tempo; Algumas doenças afetam o controle desses músculos; O sistema de proteção pode ficar mais lento; Problemas nos dentes ou na boca dificultam mastigar. Importante: engasgos frequentes não são normais da idade. Eles avisam que algo precisa ser avaliado por um profissional."
+    },
+    {
+      "pageNumber": 6,
+      "image": "/books/cartilha-engasgo/pages/06.webp",
+      "audio": null,
+      "title": "Sinais de que engolir pode não estar seguro",
+      "section": "Sinais de alerta",
+      "alt": "Página 6: Sinais de alerta durante a refeição como tosse, falta de ar, vermelhidão e dor ao engolir.",
+      "speechText": "Sinais de alerta: Sinais de que engolir pode não estar seguro. Observe se a pessoa que você cuida apresenta algum destes sinais durante ou logo depois das refeições. Durante a refeição: Tosse ao comer ou beber; Engasga com frequência; Fica com falta de ar; Rosto fica vermelho ou roxo; A comida volta para a boca; Demora muito para engolir; Engole várias vezes a mesma porção; Faz barulho na garganta; Sente dor ao engolir."
+    },
+    {
+      "pageNumber": 7,
+      "image": "/books/cartilha-engasgo/pages/07.webp",
+      "audio": null,
+      "title": "Mais sinais para observar",
+      "section": "Sinais de alerta",
+      "alt": "Página 7: Mais sinais para observar depois da refeição, com a comida sólida e com líquidos finos.",
+      "speechText": "Sinais de alerta: Mais sinais para observar. Depois da refeição: Voz fica diferente, molhada ou rouca; Fica com pigarro ou limpa a garganta várias vezes; Tosse depois de já ter engolido. Com a comida: Deixa comida parada na boca por muito tempo; A comida cai da boca ou mastiga de um lado só; Não consegue mastigar direito. Com líquidos: Engasga mais com líquidos finos como água, suco ou café; Bebe muito devagar ou evita beber; Derrama líquido pela boca."
+    },
+    {
+      "pageNumber": 8,
+      "image": "/books/cartilha-engasgo/pages/08.webp",
+      "audio": null,
+      "title": "Sinais no dia a dia",
+      "section": "Sinais de alerta",
+      "alt": "Página 8: Sinais no dia a dia, perda de peso, cansaço, pneumonia recorrente e engasgo com saliva.",
+      "speechText": "Sinais de alerta: No dia a dia. Está perdendo peso sem motivo aparente; Come cada vez menos ou não quer mais comer; Fica muito cansado durante ou depois de comer; Tem pneumonia com frequência; Engasga até com a própria saliva. Se você marcou um ou mais itens desta lista, procure um fonoaudiólogo para fazer uma avaliação. Quanto antes o problema for avaliado, melhor."
+    },
+    {
+      "pageNumber": 9,
+      "image": "/books/cartilha-engasgo/pages/09.webp",
+      "audio": null,
+      "title": "Preparando o ambiente e a refeição",
+      "section": "Preparando a refeição",
+      "alt": "Página 9: Orientações para preparar o ambiente calmo e preparar a pessoa idosa para a refeição.",
+      "speechText": "Preparando a refeição: Preparando o ambiente e a refeição. O lugar e o jeito de preparar a refeição fazem diferença na segurança. O ambiente: Lugar calmo, sem TV ligada ou muita conversa; Boa iluminação, ambiente tranquilo. A pessoa: Veja se está acordada e atenta; Nunca ofereça comida se estiver sonolenta ou confusa; Limpe a boca antes de começar; Se a prótese estiver adaptada, utilizá-la durante a refeição."
+    },
+    {
+      "pageNumber": 10,
+      "image": "/books/cartilha-engasgo/pages/10.webp",
+      "audio": null,
+      "title": "A posição correta",
+      "section": "Preparando a refeição",
+      "alt": "Página 10: Ilustração do posicionamento correto sentado na cadeira e na cama com cabeceira elevada.",
+      "speechText": "Preparando a refeição: A posição correta. A postura durante a refeição influencia diretamente a segurança para engolir. Posicionamento na cadeira: cuidadora na mesma altura, cabeça para frente, costas retas e pés no chão. Na cama: cabeceira elevada a 75 graus, sentado e não deitado, com almofadas de apoio. Quem vai oferecer a comida: Sente na altura dos olhos da pessoa, ou um pouco abaixo. Nunca fique em pé oferecendo comida a quem está sentado."
+    },
+    {
+      "pageNumber": 11,
+      "image": "/books/cartilha-engasgo/pages/11.webp",
+      "audio": null,
+      "title": "O ritmo e a quantidade",
+      "section": "Durante a refeição",
+      "alt": "Página 11: O ritmo e a quantidade durante a refeição, evitando pressa e porções excessivas.",
+      "speechText": "Durante a refeição: O ritmo e a quantidade. O ritmo: Vá devagar, sem pressa; Espere engolir completamente antes da próxima porção; Observe se a boca está vazia antes de dar mais; Faça pausas se a pessoa parecer cansada. A quantidade: Ofereça porções pequenas, encha pouco a colher; Não coloque muita comida na boca de uma vez."
+    },
+    {
+      "pageNumber": 12,
+      "image": "/books/cartilha-engasgo/pages/12.webp",
+      "audio": null,
+      "title": "Atenção e pós-refeição",
+      "section": "Durante a refeição",
+      "alt": "Página 12: Cuidados de atenção contínua durante a refeição e manter sentada por 30 minutos pós-refeição.",
+      "speechText": "Durante a refeição: Atenção e pós-refeição. A atenção: Não deixe comer sozinha se tem dificuldade para engolir; Fique presente durante toda a refeição; Não converse enquanto ela tem comida na boca. Depois da refeição: Mantenha sentada por pelo menos 30 minutos; Não deite a pessoa logo depois de comer; Limpe a boca e veja se não ficou comida parada."
+    },
+    {
+      "pageNumber": 13,
+      "image": "/books/cartilha-engasgo/pages/13.webp",
+      "audio": null,
+      "title": "Se a pessoa engasgar",
+      "section": "Em caso de engasgo",
+      "alt": "Página 13: Orientações se a pessoa engasgar: deixar tossir, não dar água e quando buscar emergência médica.",
+      "speechText": "Em caso de engasgo: Se a pessoa engasgar. Deixe ela tossir. A tosse é a defesa do corpo. Não ofereça água para empurrar a comida. Se o engasgo passar, observe se a pessoa ficou bem. Se ela não conseguir respirar, procure emergência imediatamente. Lembre-se: esta cartilha não ensina como agir em uma emergência. Em caso de engasgo grave, procure ajuda médica."
+    },
+    {
+      "pageNumber": 14,
+      "image": "/books/cartilha-engasgo/pages/14.webp",
+      "audio": null,
+      "title": "Por que não tem receita pronta sobre a comida",
+      "section": "Sobre a alimentação",
+      "alt": "Página 14: Cuidados para não seguir dietas genéricas, receitas da internet ou espessantes sem avaliação individual.",
+      "speechText": "Sobre a alimentação: Por que não tem receita pronta sobre a comida. Que tipo de comida devo dar? Mais mole? Mais dura? Líquido grosso ou fino? A verdade é: não existe uma resposta igual para todo mundo. Cada pessoa tem uma dificuldade diferente e depende do que a está causando. Por isso: Não siga receita de vizinho ou da internet; Não copie a dieta de outro paciente; Não use produtos para engrossar líquido sem orientação. O que é seguro para uma pessoa pode ser perigoso para outra."
+    },
+    {
+      "pageNumber": 15,
+      "image": "/books/cartilha-engasgo/pages/15.webp",
+      "audio": null,
+      "title": "Quando procurar um fonoaudiólogo",
+      "section": "Buscando ajuda profissional",
+      "alt": "Página 15: Quando procurar um fonoaudiólogo e como o profissional avalia e orienta a consistência segura.",
+      "speechText": "Buscando ajuda profissional: Quando procurar um fonoaudiólogo. Procure se: Você marcou algum item da lista de sinais; A pessoa come cada vez menos ou está perdendo peso; As refeições se tornaram momento de medo ou estresse; A pessoa teve pneumonia mais de uma vez. O fonoaudiólogo pode: Avaliar a deglutição e identificar a causa; Orientar sobre postura, ambiente e ritmo; Indicar a consistência de alimento mais segura."
+    },
+    {
+      "pageNumber": 16,
+      "image": "/books/cartilha-engasgo/pages/16.webp",
+      "audio": null,
+      "title": "Como encontrar um fonoaudiólogo",
+      "section": "Buscando ajuda profissional",
+      "alt": "Página 16: Onde buscar atendimento fonoaudiológico (UBS/postos, indicação médica e site do CRFa).",
+      "speechText": "Buscando ajuda profissional: Como encontrar um fonoaudiólogo. Procure nas Unidades Básicas de Saúde, os postos; Peça indicação ao médico que acompanha a pessoa; Procure pelo site do CRFa, Conselho Regional de Fonoaudiologia. Não espere o problema piorar. Quanto antes buscar ajuda, melhor."
+    },
+    {
+      "pageNumber": 17,
+      "image": "/books/cartilha-engasgo/pages/17.webp",
+      "audio": null,
+      "title": "Sobre esta edição",
+      "section": "Sobre esta edição",
+      "alt": "Página 17: Sobre esta edição. Elaboração e Responsabilidade Técnica: Sônia Torres, Fonoaudióloga CRFa 1-17701. Informações de distribuição e direitos.",
+      "speechText": "Sobre esta edição. Série de cartilhas educacionais. Primeira edição: Engasgo em Idosos Durante as Refeições. Elaboração e Responsabilidade Técnica: Sônia Torres, Fonoaudióloga, CRFa 1-17701. Esta é a primeira cartilha de uma série criada para apoiar famílias e cuidadores no dia a dia do cuidado com pessoas idosas. O objetivo não é ensinar a tratar problemas de saúde, mas ajudar a observar, entender quando procurar ajuda profissional, e ter informação de qualidade. Esta cartilha não substitui avaliação e acompanhamento profissional individual. Material educativo de distribuição gratuita."
+    }
+  ]
+}

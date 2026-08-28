@@ -4,18 +4,21 @@ import { BookManifest } from '../../types/book';
 import { AudioState, AudioProgress } from '../../types/audio';
 import { ReaderMode } from '../../types/reader';
 import { globalAudioManager } from '../../services/audioManager';
-import { getPageAudioUrl } from '../../services/bookService';
+import { getPageAudioUrl, getPageSpeechText } from '../../services/bookService';
+import { browserSpeech, SpeechState } from '../../services/speechService';
+import { soundEffects } from '../../utils/soundEffects';
 import { BookCover } from '../BookCover/BookCover';
 import { BookFinished } from '../BookFinished/BookFinished';
 import { BookPage } from '../BookPage/BookPage';
 import { ReaderControls } from '../ReaderControls/ReaderControls';
+import { TableOfContents } from '../TableOfContents/TableOfContents';
 import { checkPrefersReducedMotion, subscribeToReducedMotion } from '../../utils/a11y';
 import {
   isFullscreenSupported,
   isCurrentlyFullscreen,
   toggleFullscreen,
 } from '../../utils/fullscreen';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Volume2, X } from 'lucide-react';
 
 interface BookReaderProps {
   book: BookManifest;
@@ -27,8 +30,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [audioState, setAudioState] = useState<AudioState>('IDLE');
   const [audioProgress, setAudioProgress] = useState<AudioProgress | null>(null);
+  const [speechState, setSpeechState] = useState<SpeechState>('IDLE');
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isTocOpen, setIsTocOpen] = useState<boolean>(false);
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [reducedMotion, setReducedMotion] = useState<boolean>(checkPrefersReducedMotion());
 
   const flipbookContainerRef = useRef<HTMLDivElement | null>(null);
@@ -36,13 +42,13 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   const readerRootRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLElement | null>(null);
 
-  // Escuta áudio
+  // Escuta áudio gravado
   useEffect(() => {
     const unsubscribe = globalAudioManager.subscribe({
       onStateChange: (state) => setAudioState(state),
       onProgress: (progress) => setAudioProgress(progress),
       onEnded: () => {
-        // Áudio terminou naturalmente
+        // Áudio terminou
       },
     });
 
@@ -51,7 +57,21 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     };
   }, []);
 
-  // Escuta preferências de acessibilidade (reduced motion)
+  // Escuta síntese de fala no navegador
+  useEffect(() => {
+    const unsubscribe = browserSpeech.subscribe({
+      onStateChange: (state) => setSpeechState(state),
+      onEnded: () => {
+        // Fala concluiu
+      },
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Escuta acessibilidade de movimento reduzido
   useEffect(() => {
     const unsubscribe = subscribeToReducedMotion((reduced) => {
       setReducedMotion(reduced);
@@ -74,17 +94,29 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     };
   }, []);
 
-  // Efeito P0: Ao mudar de página no modo READING, carrega e reproduz o áudio correspondente
+  // Fecha o zoom ao mudar de página ou modo
+  useEffect(() => {
+    setIsZoomed(false);
+  }, [currentPage, mode]);
+  // Se houver áudio gravado em estúdio, carrega e reproduz.
+  // Caso contrário, prepara para leitura de voz sob demanda.
   useEffect(() => {
     if (mode === 'READING') {
       const audioUrl = getPageAudioUrl(book, currentPage);
-      globalAudioManager.loadAndPlay(audioUrl, true);
+      if (audioUrl) {
+        globalAudioManager.loadAndPlay(audioUrl, true);
+      } else {
+        globalAudioManager.stopAndReset();
+        // Para fala anterior ao virar a página
+        browserSpeech.stop();
+      }
     } else {
       globalAudioManager.stopAndReset();
+      browserSpeech.stop();
     }
   }, [book, currentPage, mode]);
 
-  // Inicialização e Redimensionamento Reativo do StPageFlip quando entrar no modo READING
+  // Inicialização e Redimensionamento do StPageFlip quando entrar no modo READING
   useEffect(() => {
     if (mode !== 'READING' || !flipbookContainerRef.current) {
       return;
@@ -103,52 +135,70 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       pageFlipInstanceRef.current = null;
     }
 
-    // Garante que todas as páginas estejam devidamente montadas no DOM
+    // Garante que todas as páginas estejam montadas no DOM
     const pageElements = flipbookContainerRef.current.querySelectorAll<HTMLElement>('.page-item');
     if (pageElements.length < book.pages.length) {
       return;
     }
 
     try {
-      // Calcula dimensões ideais para exibição de página individual (1 cena por vez)
       const container = stageRef.current || flipbookContainerRef.current.parentElement;
       const stageWidth = container?.clientWidth || window.innerWidth;
       const stageHeight = container?.clientHeight || window.innerHeight;
 
-      // Margens de respiro para garantir aproveitamento máximo da tela
+      // Margens de respiro
       const isMobile = stageWidth <= 768;
-      const paddingX = isMobile ? 12 : 24;
-      const paddingY = isMobile ? 8 : 16;
+      const paddingX = isMobile ? 12 : 32;
+      const paddingY = isMobile ? 8 : 24;
 
-      const availWidth = Math.max(180, stageWidth - paddingX);
-      const availHeight = Math.max(180, stageHeight - paddingY);
+      const availWidth = Math.max(160, stageWidth - paddingX);
+      const availHeight = Math.max(160, stageHeight - paddingY);
 
-      // Cada página é uma cena individual completa com sua própria narração
-      // O tamanho ideal ocupa o maior espaço mantendo a proporção 1:1
-      const baseDimension = Math.round(Math.min(availWidth, availHeight));
-      const baseWidth = baseDimension;
-      const baseHeight = baseDimension;
+      const isPortrait = book.aspectRatio === 'portrait' || (book.pageDimensions && book.pageDimensions.height > book.pageDimensions.width);
+      const targetAspect = isPortrait
+        ? (book.pageDimensions ? book.pageDimensions.width / book.pageDimensions.height : 420 / 595)
+        : 1.0;
+
+      let baseWidth: number;
+      let baseHeight: number;
+
+      if (isPortrait) {
+        // Ajusta para caber na altura disponível mantendo a proporção A5
+        baseHeight = Math.round(availHeight);
+        baseWidth = Math.round(baseHeight * targetAspect);
+
+        // Se a largura ultrapassar o espaço disponível, reescala pela largura
+        if (baseWidth > availWidth) {
+          baseWidth = Math.round(availWidth);
+          baseHeight = Math.round(baseWidth / targetAspect);
+        }
+      } else {
+        const baseDimension = Math.round(Math.min(availWidth, availHeight));
+        baseWidth = baseDimension;
+        baseHeight = baseDimension;
+      }
 
       const pageFlip = new PageFlip(flipbookContainerRef.current, {
-        width: baseWidth,
-        height: baseHeight,
+        width: Math.max(140, baseWidth),
+        height: Math.max(180, baseHeight),
         size: 'fixed',
         drawShadow: true,
-        flippingTime: reducedMotion ? 100 : 700,
+        flippingTime: reducedMotion ? 100 : 650,
         usePortrait: true,
         startPage: currentPage - 1,
         autoSize: true,
         showCover: false,
-        maxShadowOpacity: 0.5,
+        maxShadowOpacity: 0.45,
       });
 
       // Carrega elementos HTML das páginas
       pageFlip.loadFromHTML(pageElements as unknown as NodeListOf<HTMLElement>);
 
-      // Sincroniza virada física com estado lógico React
+      // Sincroniza virada física com estado lógico React e reproduz som de papel
       pageFlip.on('flip', (e: { data: number }) => {
         const targetPage = e.data + 1;
         setCurrentPage(targetPage);
+        soundEffects.playPageFlipSound();
 
         // Se chegou ao fim do livro
         if (targetPage > book.totalPages) {
@@ -158,7 +208,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
 
       pageFlipInstanceRef.current = pageFlip;
 
-      // Manipulador de resize com requestAnimationFrame usando update() nativo sem destruir DOM
+      // Manipulador de resize reativo
       const handleResize = () => {
         if (animationFrameId) {
           cancelAnimationFrame(animationFrameId);
@@ -174,7 +224,6 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
         });
       };
 
-      // Registra ResizeObserver no container do palco de leitura
       if (typeof ResizeObserver !== 'undefined' && container) {
         resizeObserver = new ResizeObserver(handleResize);
         resizeObserver.observe(container);
@@ -207,7 +256,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     } catch (err) {
       console.warn('Inicialização do PageFlip:', err);
     }
-  }, [mode, reducedMotion, book.totalPages, sessionKey]);
+  }, [mode, reducedMotion, book.totalPages, book.aspectRatio, book.pageDimensions, sessionKey]);
 
   // Ações de navegação
   const goToPage = useCallback(
@@ -216,6 +265,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       if (clamped === currentPage) return;
 
       setCurrentPage(clamped);
+      soundEffects.playPageFlipSound();
 
       if (pageFlipInstanceRef.current) {
         try {
@@ -242,7 +292,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     }
   }, [currentPage, book.totalPages, goToPage]);
 
-  // Teclado (Setas & Barra de espaço)
+  // Teclado (Setas, Espaço, M, Esc)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (mode !== 'READING') return;
@@ -255,25 +305,31 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
         handleNextPage();
       } else if (e.key === ' ') {
         e.preventDefault();
-        globalAudioManager.togglePlay();
+        handleTogglePlay();
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        handleToggleMute();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mode, handlePrevPage, handleNextPage]);
+  }, [mode, handlePrevPage, handleNextPage, currentPage]);
 
   // Iniciar Leitura
   const handleStartReading = () => {
+    soundEffects.playPageFlipSound();
     setMode('READING');
     setCurrentPage(1);
   };
 
-  // Ler Novamente: reseta estado de áudio, destrói com segurança instância antiga e remonta DOM com nova sessionKey
+  // Ler Novamente: reseta estado de áudio e fala, destrói com segurança instância e remonta DOM
   const handleRestartBook = () => {
     globalAudioManager.stopAndReset();
+    browserSpeech.stop();
     setAudioState('IDLE');
     setAudioProgress(null);
+    setSpeechState('IDLE');
 
     if (pageFlipInstanceRef.current) {
       try {
@@ -289,18 +345,35 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     setMode('COVER');
   };
 
-  // Controles de Áudio
+  // Controles de Áudio / Síntese de Voz
   const handleTogglePlay = () => {
-    globalAudioManager.togglePlay();
+    const audioUrl = getPageAudioUrl(book, currentPage);
+    if (audioUrl) {
+      globalAudioManager.togglePlay();
+    } else {
+      const speechText = getPageSpeechText(book, currentPage);
+      if (speechText) {
+        browserSpeech.toggle(speechText);
+      }
+    }
   };
 
   const handleRestartAudio = () => {
-    globalAudioManager.restart();
+    const audioUrl = getPageAudioUrl(book, currentPage);
+    if (audioUrl) {
+      globalAudioManager.restart();
+    } else {
+      const speechText = getPageSpeechText(book, currentPage);
+      if (speechText) {
+        browserSpeech.speak(speechText);
+      }
+    }
   };
 
   const handleToggleMute = () => {
     const muted = globalAudioManager.toggleMute();
     setIsMuted(muted);
+    soundEffects.setEnabled(!muted);
   };
 
   const handleToggleFullscreen = () => {
@@ -310,17 +383,43 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   };
 
   const hasAudioOnCurrentPage = Boolean(getPageAudioUrl(book, currentPage));
+  const hasSpeechOnCurrentPage = Boolean(getPageSpeechText(book, currentPage));
+  const currentPageData = book.pages[currentPage - 1];
 
   return (
     <div className="app-container" ref={readerRootRef}>
       {/* Header Superior */}
       <header className="reader-header">
-        <h1 className="reader-title">{book.title}</h1>
+        <div className="reader-header-left">
+          <button
+            type="button"
+            className="btn-header-toc"
+            onClick={() => setIsTocOpen(true)}
+            aria-label="Abrir sumário"
+            title="Ver sumário e índice de páginas"
+          >
+            <BookOpen size={18} />
+            <span className="header-toc-label">Sumário</span>
+          </button>
+          <h1 className="reader-title" title={book.title}>
+            {book.title}
+          </h1>
+        </div>
+
         <div className="reader-header-badges">
-          <span className="badge">16 Páginas</span>
-          {hasAudioOnCurrentPage && (
-            <span className={`badge ${isMuted ? 'badge-muted' : ''}`}>
-              {isMuted ? 'Som Mutado' : 'Áudio Ativo'}
+          {currentPageData?.section && (
+            <span className="badge badge-section" title="Seção atual">
+              {currentPageData.section}
+            </span>
+          )}
+          <span className="badge">{book.totalPages} Páginas</span>
+          {hasSpeechOnCurrentPage && !hasAudioOnCurrentPage && (
+            <span
+              className={`badge badge-speech ${speechState === 'SPEAKING' ? 'active-pulse' : ''}`}
+              title="Leitura acessível por voz em pt-BR disponível"
+            >
+              <Volume2 size={13} style={{ marginRight: 4 }} />
+              {speechState === 'SPEAKING' ? 'Lendo...' : 'Voz pt-BR'}
             </span>
           )}
         </div>
@@ -333,7 +432,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
 
       {/* Palco do Flipbook */}
       <main className="reader-stage" ref={stageRef} role="main">
-        {/* Áreas de toque nas laterais para mobile/desktop */}
+        {/* Áreas de toque nas laterais */}
         {mode === 'READING' && currentPage > 1 && (
           <div
             className="touch-nav-area left"
@@ -360,8 +459,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           </div>
         )}
 
-        {/* Container do StPageFlip com remonte completo do DOM isolado por sessionKey */}
-        <div className="flipbook-wrapper" key={sessionKey}>
+        {/* Container do StPageFlip */}
+        <div
+          className={`flipbook-wrapper ${book.aspectRatio === 'portrait' ? 'portrait-book' : ''}`}
+          key={sessionKey}
+        >
           <div className="flipbook-container" ref={flipbookContainerRef}>
             {book.pages.map((page) => (
               <BookPage
@@ -373,6 +475,45 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           </div>
         </div>
       </main>
+
+      {/* Modal de Zoom da Página Atual */}
+      {isZoomed && currentPageData && (
+        <div
+          className="zoom-modal-overlay"
+          onClick={() => setIsZoomed(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Visualização ampliada da página"
+        >
+          <div className="zoom-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="zoom-close-btn"
+              onClick={() => setIsZoomed(false)}
+              aria-label="Fechar ampliação"
+            >
+              <X size={24} />
+            </button>
+            <img
+              src={currentPageData.image}
+              alt={currentPageData.alt || `Página ampliada ${currentPage}`}
+              className="zoom-image"
+            />
+            <div className="zoom-caption">
+              Página {currentPage} de {book.totalPages} {currentPageData.title ? `— ${currentPageData.title}` : ''}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sumário e Drawer de Miniaturas */}
+      <TableOfContents
+        book={book}
+        currentPage={currentPage}
+        isOpen={isTocOpen}
+        onClose={() => setIsTocOpen(false)}
+        onSelectPage={goToPage}
+      />
 
       {/* Tela Final */}
       {mode === 'FINISHED' && (
@@ -387,15 +528,21 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           audioState={audioState}
           audioProgress={audioProgress}
           hasAudioOnCurrentPage={hasAudioOnCurrentPage}
+          speechState={speechState}
+          hasSpeechOnCurrentPage={hasSpeechOnCurrentPage}
           isMuted={isMuted}
           isFullscreen={isFullscreen}
           isFullscreenAvailable={isFullscreenSupported()}
+          isZoomed={isZoomed}
+          pdfUrl={book.pdfUrl}
           onPrevPage={handlePrevPage}
           onNextPage={handleNextPage}
           onTogglePlay={handleTogglePlay}
           onRestartAudio={handleRestartAudio}
           onToggleMute={handleToggleMute}
           onToggleFullscreen={handleToggleFullscreen}
+          onToggleToc={() => setIsTocOpen(true)}
+          onToggleZoom={() => setIsZoomed((prev) => !prev)}
         />
       )}
     </div>

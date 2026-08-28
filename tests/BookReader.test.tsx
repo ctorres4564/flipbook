@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BookReader } from '../src/components/BookReader/BookReader';
 import { BookManifest } from '../src/types/book';
+import cartilhaManifest from '../src/books/cartilha-engasgo/book.json';
 
 const mockUpdate = vi.fn();
 const mockDestroy = vi.fn();
@@ -156,9 +157,9 @@ describe('BookReader Component Integration with Resize & Real Assets', () => {
       fireEvent.click(nextButton);
     });
 
-    const restartButton = screen.getByRole('button', { name: /Ler o livro novamente/i });
+    const restartButton = screen.getByRole('button', { name: /Reler a cartilha desde o início|Ler o livro novamente/i });
     expect(restartButton).toBeInTheDocument();
-    expect(screen.getByText('Você chegou ao final!')).toBeInTheDocument();
+    expect(screen.getByText('Você concluiu a leitura!')).toBeInTheDocument();
 
     // 4. Clica em Ler Novamente
     await act(async () => {
@@ -187,5 +188,48 @@ describe('BookReader Component Integration with Resize & Real Assets', () => {
       fireEvent.click(secondNextButton);
     });
     expect(screen.getByText('3 / 16')).toBeInTheDocument();
+  });
+});
+
+describe('Cartilha Engasgo em Idosos - Interactive Reader Flow', () => {
+  const cartilha = cartilhaManifest as unknown as BookManifest;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('deve abrir a cartilha, exibir os 17 tópicos do sumário e permitir navegação direta', async () => {
+    render(<BookReader book={cartilha} />);
+
+    // Verifica capa com título e autora
+    const titles = screen.getAllByText('Engasgo em Idosos Durante as Refeições');
+    expect(titles.length).toBeGreaterThan(0);
+    expect(screen.getByText('Sônia Torres')).toBeInTheDocument();
+
+    // Inicia leitura da cartilha
+    const openButton = screen.getByRole('button', { name: /Abrir Cartilha Digital/i });
+    await act(async () => {
+      fireEvent.click(openButton);
+    });
+
+    expect(screen.getByText('1 / 17')).toBeInTheDocument();
+
+    // Abre o sumário
+    const tocButton = screen.getByLabelText(/Abrir sumário e miniaturas/i);
+    await act(async () => {
+      fireEvent.click(tocButton);
+    });
+
+    expect(screen.getByText('Sumário da Cartilha')).toBeInTheDocument();
+    expect(screen.getByText('A posição correta (Postura)')).toBeInTheDocument();
+
+    // Clica no tópico da página 10
+    const topicItem = screen.getByText('A posição correta (Postura)');
+    await act(async () => {
+      fireEvent.click(topicItem);
+    });
+
+    // Deve saltar para página 10 / 17
+    expect(screen.getByText('10 / 17')).toBeInTheDocument();
   });
 });

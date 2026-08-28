@@ -68,7 +68,7 @@ export function getBookBySlug(slug: string): BookManifest | undefined {
 }
 
 /**
- * Retorna a URL do áudio de uma página específica (1-based), ou null caso não exista
+ * Retorna a URL do áudio pré-gravado de uma página específica (1-based), ou null caso não exista
  */
 export function getPageAudioUrl(manifest: BookManifest, pageNumber: number): string | null {
   if (pageNumber < 1 || pageNumber > manifest.pages.length) {
@@ -76,4 +76,28 @@ export function getPageAudioUrl(manifest: BookManifest, pageNumber: number): str
   }
   const page = manifest.pages[pageNumber - 1];
   return page.audio || null;
+}
+
+/**
+ * Retorna o texto acessível de leitura para síntese de voz (pt-BR)
+ */
+export function getPageSpeechText(manifest: BookManifest, pageNumber: number): string | null {
+  if (pageNumber < 1 || pageNumber > manifest.pages.length) {
+    return null;
+  }
+  const page = manifest.pages[pageNumber - 1];
+  return page.speechText || page.alt || page.title || null;
+}
+
+/**
+ * Retorna todos os livros disponíveis no catálogo
+ */
+export function getAllBooks(): BookManifest[] {
+  const uniqueBooks = new Map<string, BookManifest>();
+  Object.values(BOOKS_REGISTRY).forEach((book) => {
+    if (!uniqueBooks.has(book.slug)) {
+      uniqueBooks.set(book.slug, book);
+    }
+  });
+  return Array.from(uniqueBooks.values());
 }
