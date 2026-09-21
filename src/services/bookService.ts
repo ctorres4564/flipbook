@@ -101,3 +101,14 @@ export function getAllBooks(): BookManifest[] {
   });
   return Array.from(uniqueBooks.values());
 }
+
+/**
+ * Retorna o título formatado para a aba do navegador para o livro
+ */
+export function getBookDocumentTitle(manifest?: BookManifest | null): string {
+  if (!manifest) {
+    return 'Os Caminhos de Nina | Fonosuite';
+  }
+  return manifest.documentTitle || `${manifest.title} | Fonosuite`;
+}
+

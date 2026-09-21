@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BookReader } from '../src/components/BookReader/BookReader';
 import caminhosDeNinaManifest from '../src/books/caminhos-de-nina/book.json';
 import { BookManifest } from '../src/types/book';
-import { validateBookManifest, getBookBySlug } from '../src/services/bookService';
+import { validateBookManifest, getBookBySlug, getBookDocumentTitle } from '../src/services/bookService';
 import { globalAudioManager } from '../src/services/audioManager';
 
 // Mock do page-flip para ambiente jsdom
@@ -58,7 +58,7 @@ describe('Flipbook Digital "Os Caminhos de Nina" - Testes de Integridade e Regra
     // 17. Página 16 — atividade
     const activityPage = nina.pages[16];
     expect(activityPage.pageNumber).toBe(17);
-    expect(activityPage.image).toContain('17-pagina-16.png');
+    expect(activityPage.image).toContain('17-pagina-16.1.png');
     expect(activityPage.audio).toContain('17-pagina-16.wav');
     expect(activityPage.isActivity).toBe(true);
 
@@ -82,6 +82,7 @@ describe('Flipbook Digital "Os Caminhos de Nina" - Testes de Integridade e Regra
     const book = getBookBySlug('caminhos-de-nina');
     expect(book).toBeDefined();
     expect(book?.title).toBe('Os Caminhos de Nina');
+    expect(getBookDocumentTitle(book)).toBe('Os Caminhos de Nina | Fonosuite');
 
     // Suporte aos aliases
     expect(getBookBySlug('nina')).toBeDefined();
@@ -90,6 +91,9 @@ describe('Flipbook Digital "Os Caminhos de Nina" - Testes de Integridade e Regra
 
   it('deve abrir diretamente no leitor mostrando a Capa (página 1) sem botões de áudio', () => {
     render(<BookReader book={nina} />);
+
+    // Título da aba deve ser "Os Caminhos de Nina | Fonosuite"
+    expect(document.title).toBe('Os Caminhos de Nina | Fonosuite');
 
     // Na Capa (página 1), não deve ter controles de áudio
     expect(screen.queryByRole('button', { name: /ouvir/i })).not.toBeInTheDocument();

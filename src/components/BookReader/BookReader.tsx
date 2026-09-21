@@ -4,12 +4,11 @@ import { BookManifest } from '../../types/book';
 import { AudioState, AudioProgress } from '../../types/audio';
 import { ReaderMode } from '../../types/reader';
 import { globalAudioManager } from '../../services/audioManager';
-import { getPageAudioUrl, getPageSpeechText } from '../../services/bookService';
+import { getPageAudioUrl, getPageSpeechText, getBookDocumentTitle } from '../../services/bookService';
 import { browserSpeech, SpeechState } from '../../services/speechService';
 import { soundEffects } from '../../utils/soundEffects';
 import { BookCover } from '../BookCover/BookCover';
 import { BookFinished } from '../BookFinished/BookFinished';
-import { BookPage } from '../BookPage/BookPage';
 import { ReaderControls } from '../ReaderControls/ReaderControls';
 import { TableOfContents } from '../TableOfContents/TableOfContents';
 import { checkPrefersReducedMotion, subscribeToReducedMotion } from '../../utils/a11y';
@@ -43,7 +42,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [reducedMotion, setReducedMotion] = useState<boolean>(checkPrefersReducedMotion());
 
-  const flipbookContainerRef = useRef<HTMLDivElement | null>(null);
+  const flipbookWrapperRef = useRef<HTMLDivElement | null>(null);
   const pageFlipInstanceRef = useRef<PageFlip | null>(null);
   const readerRootRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLElement | null>(null);
@@ -122,12 +121,18 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
     }
   }, [book, currentPage, mode]);
 
+  // Atualiza dinamicamente o título da aba
+  useEffect(() => {
+    document.title = getBookDocumentTitle(book);
+  }, [book]);
+
   // Inicialização e Redimensionamento do StPageFlip quando entrar no modo READING
   useEffect(() => {
-    if (mode !== 'READING' || !flipbookContainerRef.current) {
+    if (mode !== 'READING' || !flipbookWrapperRef.current) {
       return;
     }
 
+    const wrapper = flipbookWrapperRef.current;
     let resizeObserver: ResizeObserver | null = null;
     let animationFrameId: number | null = null;
 
@@ -141,16 +146,36 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       pageFlipInstanceRef.current = null;
     }
 
-    // Garante que todas as páginas estejam montadas no DOM
-    const pageElements = flipbookContainerRef.current.querySelectorAll<HTMLElement>('.page-item');
-    if (pageElements.length < book.pages.length) {
-      return;
-    }
+    // Isola completamente o DOM do PageFlip da árvore virtual do React
+    wrapper.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'flipbook-container';
+    wrapper.appendChild(container);
+
+    const pageElements: HTMLElement[] = [];
+
+    book.pages.forEach((page) => {
+      const pageEl = document.createElement('div');
+      pageEl.className = 'page-item';
+      pageEl.setAttribute('data-density', 'hard');
+      pageEl.setAttribute('role', 'region');
+      pageEl.setAttribute('aria-label', `Página ${page.pageNumber} de ${book.totalPages}`);
+
+      const img = document.createElement('img');
+      img.src = page.image;
+      img.alt = page.alt || `Página ${page.pageNumber}`;
+      img.className = 'page-image';
+      img.loading = page.pageNumber <= 2 ? 'eager' : 'lazy';
+
+      pageEl.appendChild(img);
+      container.appendChild(pageEl);
+      pageElements.push(pageEl);
+    });
 
     try {
-      const container = stageRef.current || flipbookContainerRef.current.parentElement;
-      const stageWidth = container?.clientWidth || window.innerWidth;
-      const stageHeight = container?.clientHeight || window.innerHeight;
+      const stageEl = stageRef.current || wrapper.parentElement;
+      const stageWidth = stageEl?.clientWidth || window.innerWidth;
+      const stageHeight = stageEl?.clientHeight || window.innerHeight;
 
       // Margens de respiro
       const isMobile = stageWidth <= 768;
@@ -184,7 +209,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
         baseHeight = baseDimension;
       }
 
-      const pageFlip = new PageFlip(flipbookContainerRef.current, {
+      const pageFlip = new PageFlip(container, {
         width: Math.max(140, baseWidth),
         height: Math.max(180, baseHeight),
         size: 'fixed',
@@ -230,9 +255,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
         });
       };
 
-      if (typeof ResizeObserver !== 'undefined' && container) {
+      if (typeof ResizeObserver !== 'undefined' && stageEl) {
         resizeObserver = new ResizeObserver(handleResize);
-        resizeObserver.observe(container);
+        resizeObserver.observe(stageEl);
       }
 
       window.addEventListener('resize', handleResize);
@@ -257,6 +282,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
             // cleanup seguro
           }
           pageFlipInstanceRef.current = null;
+        }
+        if (flipbookWrapperRef.current) {
+          flipbookWrapperRef.current.innerHTML = '';
         }
       };
     } catch (err) {
@@ -474,18 +502,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
         {/* Container do StPageFlip */}
         <div
           className={`flipbook-wrapper ${book.aspectRatio === 'portrait' ? 'portrait-book' : ''}`}
+          ref={flipbookWrapperRef}
           key={sessionKey}
-        >
-          <div className="flipbook-container" ref={flipbookContainerRef}>
-            {book.pages.map((page) => (
-              <BookPage
-                key={`s${sessionKey}-p${page.pageNumber}`}
-                page={page}
-                totalPages={book.totalPages}
-              />
-            ))}
-          </div>
-        </div>
+        />
       </main>
 
       {/* Modal de Zoom da Página Atual */}

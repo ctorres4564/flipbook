@@ -32,6 +32,8 @@ export interface BookManifest {
   slug: string;
   /** Título oficial da obra */
   title: string;
+  /** Título customizado para exibição na aba do navegador (document.title) */
+  documentTitle?: string;
   /** Subtítulo da obra */
   subtitle?: string;
   /** Descrição ou sinopse */

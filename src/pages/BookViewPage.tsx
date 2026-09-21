@@ -1,12 +1,16 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { getBookBySlug } from '../services/bookService';
+import { getBookBySlug, getBookDocumentTitle } from '../services/bookService';
 import { BookReader } from '../components/BookReader/BookReader';
 
 export const BookViewPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const bookSlug = slug || 'nico';
+  const bookSlug = slug || 'caminhos-de-nina';
   const book = getBookBySlug(bookSlug);
+
+  React.useEffect(() => {
+    document.title = getBookDocumentTitle(book);
+  }, [book]);
 
   if (!book) {
     return (

@@ -1,6 +1,7 @@
 {
   "slug": "caminhos-de-nina",
   "title": "Os Caminhos de Nina",
+  "documentTitle": "Os Caminhos de Nina | Fonosuite",
   "description": "Um livro infantil sensível sobre escolhas, descobertas e imaginação.",
   "coverImage": "/books/caminhos-de-nina/pages/01-capa.png",
   "totalPages": 18,
@@ -181,7 +182,7 @@
     },
     {
       "pageNumber": 17,
-      "image": "/books/caminhos-de-nina/pages/17-pagina-16.png",
+      "image": "/books/caminhos-de-nina/pages/17-pagina-16.1.png",
       "audio": "/books/caminhos-de-nina/audio/17-pagina-16.wav",
       "alt": "Página 16: Atividade de Os Caminhos de Nina",
       "title": "Página 16 — Atividade",
