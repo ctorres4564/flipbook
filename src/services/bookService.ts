@@ -1,5 +1,5 @@
 import { BookManifest } from '../types/book';
-import { BOOKS_REGISTRY } from '../books/registry';
+import { BOOKS_REGISTRY, DEFAULT_BOOK_SLUG } from '../books/registry';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -111,4 +111,18 @@ export function getBookDocumentTitle(manifest?: BookManifest | null): string {
   }
   return manifest.documentTitle || `${manifest.title} | Fonosuite`;
 }
+
+/**
+ * Retorna o slug padrão do livro baseado no hostname atual:
+ * - nico.folheia.com (ou nico.localhost para testes/dev) -> 'nico'
+ * - outros domínios (folheia.com, vercel.app, localhost) -> DEFAULT_BOOK_SLUG ('caminhos-de-nina')
+ */
+export function getDefaultBookSlugForHost(hostname?: string): string {
+  const host = (hostname !== undefined ? hostname : (typeof window !== 'undefined' ? window.location.hostname : '')).toLowerCase().trim();
+  if (host === 'nico.folheia.com' || host === 'nico.localhost') {
+    return 'nico';
+  }
+  return DEFAULT_BOOK_SLUG;
+}
+
 
