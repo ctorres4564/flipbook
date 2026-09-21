@@ -23,10 +23,12 @@ export interface BookPage {
   section?: string;
   /** Texto completo para leitura em voz alta acessível (Web Speech Synthesis pt-BR) */
   speechText?: string;
+  /** Indica se a página é uma atividade com opção de impressão */
+  isActivity?: boolean;
 }
 
 export interface BookManifest {
-  /** Identificador único na URL (ex: "cartilha-engasgo", "nico") */
+  /** Identificador único na URL (ex: "cartilha-engasgo", "nico", "caminhos-de-nina") */
   slug: string;
   /** Título oficial da obra */
   title: string;
@@ -53,6 +55,12 @@ export interface BookManifest {
   };
   /** Link para download do arquivo PDF original */
   pdfUrl?: string;
+  /** Iniciar diretamente no modo de leitura (exibindo a capa como página 1) */
+  startInReadingMode?: boolean;
+  /** Desativar efeitos sonoros adicionais (ex: folhear papel) */
+  disableSoundEffects?: boolean;
+  /** Se deve tocar áudio automaticamente ao virar a página (default false) */
+  autoPlayAudio?: boolean;
   /** Tópicos do sumário / Índice */
   topics?: BookTopic[];
   /** Lista ordenada de páginas */

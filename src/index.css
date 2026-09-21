@@ -919,3 +919,136 @@ html, body, #root {
     padding: 20px 16px;
   }
 }
+
+/* ==========================================================================
+   Estilos dos Controles Especializados (Áudio com Rótulo e Atividade Imprimível)
+   ========================================================================== */
+.control-btn.audio-toggle-btn {
+  width: auto;
+  min-width: 96px;
+  padding: 0 16px;
+  gap: 8px;
+  border-radius: var(--radius-full);
+}
+
+.control-btn.restart-audio-btn {
+  width: auto;
+  min-width: 42px;
+  padding: 0 12px;
+  gap: 6px;
+  border-radius: var(--radius-full);
+}
+
+.control-btn.print-activity-btn {
+  width: auto;
+  min-width: 140px;
+  padding: 0 16px;
+  gap: 8px;
+  background: rgba(45, 212, 191, 0.15);
+  color: var(--accent-teal);
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: var(--radius-full);
+}
+
+.control-btn.print-activity-btn:hover {
+  background: rgba(45, 212, 191, 0.25);
+  border-color: var(--accent-teal);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-label-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .btn-label-text {
+    display: none;
+  }
+  .control-btn.audio-toggle-btn,
+  .control-btn.restart-audio-btn {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+  }
+  .control-btn.print-activity-btn {
+    min-width: auto;
+    padding: 0 10px;
+    font-size: 0.78rem;
+  }
+  .control-btn.print-activity-btn span {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Impressão Limpa da Página de Atividade (A4 Sem Artefatos de UI)
+   ========================================================================== */
+@media screen {
+  .printable-activity-container {
+    display: none !important;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body, #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Oculta integralmente todos os elementos da aplicação e do leitor */
+  .app-container,
+  .reader-header,
+  .reader-footer,
+  .reader-stage,
+  .touch-nav-area,
+  .flipbook-wrapper,
+  .table-of-contents,
+  .cover-screen,
+  .finished-screen,
+  .zoom-modal-overlay {
+    display: none !important;
+  }
+
+  /* Exibe exclusivamente a imagem da atividade ocupando a folha A4 com proporção nativa */
+  .printable-activity-container {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 0.8cm;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    background: #ffffff !important;
+  }
+
+  .printable-activity-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border: none;
+    box-shadow: none;
+  }
+}
+

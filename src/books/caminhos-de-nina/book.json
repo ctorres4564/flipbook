@@ -1,0 +1,201 @@
+{
+  "slug": "caminhos-de-nina",
+  "title": "Os Caminhos de Nina",
+  "description": "Um livro infantil sensível sobre escolhas, descobertas e imaginação.",
+  "coverImage": "/books/caminhos-de-nina/pages/01-capa.png",
+  "totalPages": 18,
+  "aspectRatio": "portrait",
+  "pageDimensions": {
+    "width": 1122,
+    "height": 1402
+  },
+  "startInReadingMode": true,
+  "disableSoundEffects": true,
+  "autoPlayAudio": false,
+  "topics": [
+    {
+      "title": "Capa",
+      "pageNumber": 1,
+      "section": "Capa"
+    },
+    {
+      "title": "Início da História",
+      "pageNumber": 2,
+      "section": "História"
+    },
+    {
+      "title": "Atividade",
+      "pageNumber": 17,
+      "section": "Atividade"
+    },
+    {
+      "title": "Contracapa",
+      "pageNumber": 18,
+      "section": "Contracapa"
+    }
+  ],
+  "pages": [
+    {
+      "pageNumber": 1,
+      "image": "/books/caminhos-de-nina/pages/01-capa.png",
+      "audio": null,
+      "alt": "Capa do livro Os Caminhos de Nina",
+      "title": "Capa",
+      "section": "Capa",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 2,
+      "image": "/books/caminhos-de-nina/pages/02-pagina-1.png",
+      "audio": "/books/caminhos-de-nina/audio/02-pagina-1.wav",
+      "alt": "Página 1: Ilustração de Os Caminhos de Nina",
+      "title": "Página 1",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 3,
+      "image": "/books/caminhos-de-nina/pages/03-pagina-2.png",
+      "audio": "/books/caminhos-de-nina/audio/03-pagina-2.wav",
+      "alt": "Página 2: Ilustração de Os Caminhos de Nina",
+      "title": "Página 2",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 4,
+      "image": "/books/caminhos-de-nina/pages/04-pagina-3.png",
+      "audio": "/books/caminhos-de-nina/audio/04-pagina-3.wav",
+      "alt": "Página 3: Ilustração de Os Caminhos de Nina",
+      "title": "Página 3",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 5,
+      "image": "/books/caminhos-de-nina/pages/05-pagina-4.png",
+      "audio": "/books/caminhos-de-nina/audio/05-pagina-4.wav",
+      "alt": "Página 4: Ilustração de Os Caminhos de Nina",
+      "title": "Página 4",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 6,
+      "image": "/books/caminhos-de-nina/pages/06-pagina-5.png",
+      "audio": "/books/caminhos-de-nina/audio/06-pagina-5.wav",
+      "alt": "Página 5: Ilustração de Os Caminhos de Nina",
+      "title": "Página 5",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 7,
+      "image": "/books/caminhos-de-nina/pages/07-pagina-6.png",
+      "audio": "/books/caminhos-de-nina/audio/07-pagina-6.wav",
+      "alt": "Página 6: Ilustração de Os Caminhos de Nina",
+      "title": "Página 6",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 8,
+      "image": "/books/caminhos-de-nina/pages/08-pagina-7.png",
+      "audio": "/books/caminhos-de-nina/audio/08-pagina-7.wav",
+      "alt": "Página 7: Ilustração de Os Caminhos de Nina",
+      "title": "Página 7",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 9,
+      "image": "/books/caminhos-de-nina/pages/09-pagina-8.png",
+      "audio": "/books/caminhos-de-nina/audio/09-pagina-8.wav",
+      "alt": "Página 8: Ilustração de Os Caminhos de Nina",
+      "title": "Página 8",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 10,
+      "image": "/books/caminhos-de-nina/pages/10-pagina-9.png",
+      "audio": "/books/caminhos-de-nina/audio/10-pagina-9.wav",
+      "alt": "Página 9: Ilustração de Os Caminhos de Nina",
+      "title": "Página 9",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 11,
+      "image": "/books/caminhos-de-nina/pages/11-pagina-10.png",
+      "audio": "/books/caminhos-de-nina/audio/11-pagina-10.wav",
+      "alt": "Página 10: Ilustração de Os Caminhos de Nina",
+      "title": "Página 10",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 12,
+      "image": "/books/caminhos-de-nina/pages/12-pagina-11.png",
+      "audio": "/books/caminhos-de-nina/audio/12-pagina-11.wav",
+      "alt": "Página 11: Ilustração de Os Caminhos de Nina",
+      "title": "Página 11",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 13,
+      "image": "/books/caminhos-de-nina/pages/13-pagina-12.png",
+      "audio": "/books/caminhos-de-nina/audio/13-pagina-12.wav",
+      "alt": "Página 12: Ilustração de Os Caminhos de Nina",
+      "title": "Página 12",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 14,
+      "image": "/books/caminhos-de-nina/pages/14-pagina-13.png",
+      "audio": "/books/caminhos-de-nina/audio/14-pagina-13.wav",
+      "alt": "Página 13: Ilustração de Os Caminhos de Nina",
+      "title": "Página 13",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 15,
+      "image": "/books/caminhos-de-nina/pages/15-pagina-14.png",
+      "audio": "/books/caminhos-de-nina/audio/15-pagina-14.wav",
+      "alt": "Página 14: Ilustração de Os Caminhos de Nina",
+      "title": "Página 14",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 16,
+      "image": "/books/caminhos-de-nina/pages/16-pagina-15.png",
+      "audio": "/books/caminhos-de-nina/audio/16-pagina-15.wav",
+      "alt": "Página 15: Ilustração de Os Caminhos de Nina",
+      "title": "Página 15",
+      "section": "História",
+      "isActivity": false
+    },
+    {
+      "pageNumber": 17,
+      "image": "/books/caminhos-de-nina/pages/17-pagina-16.png",
+      "audio": "/books/caminhos-de-nina/audio/17-pagina-16.wav",
+      "alt": "Página 16: Atividade de Os Caminhos de Nina",
+      "title": "Página 16 — Atividade",
+      "section": "Atividade",
+      "isActivity": true
+    },
+    {
+      "pageNumber": 18,
+      "image": "/books/caminhos-de-nina/pages/18-contracapa.png",
+      "audio": "/books/caminhos-de-nina/audio/18-contracapa.wav",
+      "alt": "Contracapa do livro Os Caminhos de Nina",
+      "title": "Contracapa",
+      "section": "Contracapa",
+      "isActivity": false
+    }
+  ]
+}

@@ -25,9 +25,15 @@ interface BookReaderProps {
 }
 
 export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
-  const [mode, setMode] = useState<ReaderMode>('COVER');
+  const [mode, setMode] = useState<ReaderMode>(() => (book.startInReadingMode ? 'READING' : 'COVER'));
   const [sessionKey, setSessionKey] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const playFlipSound = useCallback(() => {
+    if (!book.disableSoundEffects) {
+      soundEffects.playPageFlipSound();
+    }
+  }, [book.disableSoundEffects]);
   const [audioState, setAudioState] = useState<AudioState>('IDLE');
   const [audioProgress, setAudioProgress] = useState<AudioProgress | null>(null);
   const [speechState, setSpeechState] = useState<SpeechState>('IDLE');
@@ -98,13 +104,13 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   useEffect(() => {
     setIsZoomed(false);
   }, [currentPage, mode]);
-  // Se houver áudio gravado em estúdio, carrega e reproduz.
-  // Caso contrário, prepara para leitura de voz sob demanda.
+  // Se houver áudio gravado em estúdio, carrega.
+  // Respeita a regra de não autoplay quando book.autoPlayAudio for false (aguarda clique em Ouvir).
   useEffect(() => {
     if (mode === 'READING') {
       const audioUrl = getPageAudioUrl(book, currentPage);
       if (audioUrl) {
-        globalAudioManager.loadAndPlay(audioUrl, true);
+        globalAudioManager.loadAndPlay(audioUrl, book.autoPlayAudio ?? false);
       } else {
         globalAudioManager.stopAndReset();
         // Para fala anterior ao virar a página
@@ -198,7 +204,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       pageFlip.on('flip', (e: { data: number }) => {
         const targetPage = e.data + 1;
         setCurrentPage(targetPage);
-        soundEffects.playPageFlipSound();
+        playFlipSound();
 
         // Se chegou ao fim do livro
         if (targetPage > book.totalPages) {
@@ -265,7 +271,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       if (clamped === currentPage) return;
 
       setCurrentPage(clamped);
-      soundEffects.playPageFlipSound();
+      playFlipSound();
 
       if (pageFlipInstanceRef.current) {
         try {
@@ -318,7 +324,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
 
   // Iniciar Leitura
   const handleStartReading = () => {
-    soundEffects.playPageFlipSound();
+    playFlipSound();
     setMode('READING');
     setCurrentPage(1);
   };
@@ -385,6 +391,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
   const hasAudioOnCurrentPage = Boolean(getPageAudioUrl(book, currentPage));
   const hasSpeechOnCurrentPage = Boolean(getPageSpeechText(book, currentPage));
   const currentPageData = book.pages[currentPage - 1];
+  const isCurrentPageActivity = Boolean(currentPageData?.isActivity || (book.slug === 'caminhos-de-nina' && currentPage === 17));
+  const activityPage = book.pages.find((p) => p.isActivity) || (book.slug === 'caminhos-de-nina' ? book.pages[16] : undefined);
+
+  const handlePrintActivity = () => {
+    window.print();
+  };
 
   return (
     <div className="app-container" ref={readerRootRef}>
@@ -530,6 +542,8 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           hasAudioOnCurrentPage={hasAudioOnCurrentPage}
           speechState={speechState}
           hasSpeechOnCurrentPage={hasSpeechOnCurrentPage}
+          isActivityPage={isCurrentPageActivity}
+          onPrintActivity={handlePrintActivity}
           isMuted={isMuted}
           isFullscreen={isFullscreen}
           isFullscreenAvailable={isFullscreenSupported()}
@@ -544,6 +558,17 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
           onToggleToc={() => setIsTocOpen(true)}
           onToggleZoom={() => setIsZoomed((prev) => !prev)}
         />
+      )}
+
+      {/* Container de impressão de alta fidelidade para folha A4 (visível apenas ao acionar impressão) */}
+      {activityPage && (
+        <div className="printable-activity-container" aria-hidden="true">
+          <img
+            src={activityPage.image}
+            alt={activityPage.alt || 'Atividade do livro Os Caminhos de Nina'}
+            className="printable-activity-image"
+          />
+        </div>
       )}
     </div>
   );

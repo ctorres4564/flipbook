@@ -13,6 +13,7 @@ import {
   Download,
   ZoomIn,
   ZoomOut,
+  Printer,
 } from 'lucide-react';
 import { AudioState, AudioProgress } from '../../types/audio';
 import { SpeechState } from '../../services/speechService';
@@ -25,6 +26,8 @@ interface ReaderControlsProps {
   hasAudioOnCurrentPage: boolean;
   speechState?: SpeechState;
   hasSpeechOnCurrentPage?: boolean;
+  isActivityPage?: boolean;
+  onPrintActivity?: () => void;
   isMuted: boolean;
   isFullscreen: boolean;
   isFullscreenAvailable: boolean;
@@ -48,6 +51,8 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
   hasAudioOnCurrentPage,
   speechState = 'IDLE',
   hasSpeechOnCurrentPage = false,
+  isActivityPage = false,
+  onPrintActivity,
   isMuted,
   isFullscreen,
   isFullscreenAvailable,
@@ -65,7 +70,6 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
   const isPlayingAudio = audioState === 'PLAYING';
   const isSpeakingSpeech = speechState === 'SPEAKING';
   const isPlayingAny = isPlayingAudio || isSpeakingSpeech;
-  const isAudioAvailable = hasAudioOnCurrentPage || hasSpeechOnCurrentPage;
 
   return (
     <footer className="reader-footer" role="toolbar" aria-label="Controles de Leitura e Áudio">
@@ -116,32 +120,49 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
           <ChevronLeft size={22} />
         </button>
 
-        {/* Ouvir Leitura em Voz Alta / Áudio */}
-        <button
-          type="button"
-          id="btn-play-pause"
-          onClick={onTogglePlay}
-          disabled={!isAudioAvailable}
-          className={`control-btn primary ${isPlayingAny ? 'playing' : ''}`}
-          aria-label={isPlayingAny ? 'Pausar leitura da página' : 'Ouvir leitura da página'}
-          title={isPlayingAny ? 'Pausar leitura' : 'Ouvir leitura da página (pt-BR)'}
-        >
-          {isPlayingAny ? <Pause size={22} /> : <Play size={22} style={{ marginLeft: 2 }} />}
-        </button>
+        {/* Controles de Áudio (Ocultos na Capa onde não há narração) */}
+        {hasAudioOnCurrentPage ? (
+          <>
+            {/* Ouvir / Pausar Narração */}
+            <button
+              type="button"
+              id="btn-play-pause"
+              onClick={onTogglePlay}
+              className={`control-btn primary audio-toggle-btn ${isPlayingAny ? 'playing' : ''}`}
+              aria-label={isPlayingAny ? 'Pausar narração' : 'Ouvir narração da página'}
+              title={isPlayingAny ? 'Pausar narração' : 'Ouvir narração da página'}
+            >
+              {isPlayingAny ? <Pause size={20} /> : <Play size={20} style={{ marginLeft: 2 }} />}
+              <span className="btn-label-text">{isPlayingAny ? 'Pausar' : 'Ouvir'}</span>
+            </button>
 
-        {/* Reiniciar Leitura / Áudio */}
-        {hasAudioOnCurrentPage && (
-          <button
-            type="button"
-            id="btn-restart-audio"
-            onClick={onRestartAudio}
-            disabled={!isAudioAvailable}
-            className="control-btn"
-            aria-label="Reiniciar narração da página"
-            title="Reiniciar áudio da página"
-          >
-            <RotateCcw size={18} />
-          </button>
+            {/* Ouvir Novamente / Reiniciar Áudio */}
+            <button
+              type="button"
+              id="btn-restart-audio"
+              onClick={onRestartAudio}
+              className="control-btn restart-audio-btn"
+              aria-label="Ouvir novamente do início"
+              title="Ouvir novamente do início"
+            >
+              <RotateCcw size={18} />
+              <span className="btn-label-text">Ouvir novamente</span>
+            </button>
+          </>
+        ) : (
+          !hasAudioOnCurrentPage && hasSpeechOnCurrentPage && currentPage > 1 && (
+            <button
+              type="button"
+              id="btn-play-pause"
+              onClick={onTogglePlay}
+              className={`control-btn primary audio-toggle-btn ${isPlayingAny ? 'playing' : ''}`}
+              aria-label={isPlayingAny ? 'Pausar narração' : 'Ouvir narração da página'}
+              title={isPlayingAny ? 'Pausar narração' : 'Ouvir narração da página'}
+            >
+              {isPlayingAny ? <Pause size={20} /> : <Play size={20} style={{ marginLeft: 2 }} />}
+              <span className="btn-label-text">{isPlayingAny ? 'Pausar' : 'Ouvir'}</span>
+            </button>
+          )
         )}
 
         {/* Indicador de Página (clicável para abrir sumário) */}
@@ -168,6 +189,21 @@ export const ReaderControls: React.FC<ReaderControlsProps> = ({
         >
           <ChevronRight size={22} />
         </button>
+
+        {/* Botão Imprimir Atividade (exclusivo para página de atividade) */}
+        {isActivityPage && onPrintActivity && (
+          <button
+            type="button"
+            id="btn-print-activity"
+            onClick={onPrintActivity}
+            className="control-btn print-activity-btn"
+            aria-label="Imprimir atividade"
+            title="Imprimir somente a página da atividade em folha A4"
+          >
+            <Printer size={18} />
+            <span>Imprimir atividade</span>
+          </button>
+        )}
 
         {/* Zoom / Modo Lupa */}
         {onToggleZoom && (
