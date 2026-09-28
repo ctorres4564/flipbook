@@ -68,7 +68,8 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
       const pad = String(i).padStart(2, '0');
       expect(page.pageNumber).toBe(i);
       expect(page.image).toBe(`/books/theo/pages/${pad}.webp`);
-      expect(page.audio).toBe(`/books/theo/audio/${pad}.wav`);
+      const expectedAudio = i === 4 ? '/books/theo/audio/04.1.wav' : `/books/theo/audio/${pad}.wav`;
+      expect(page.audio).toBe(expectedAudio);
       expect(page.alt).toBeTruthy();
       expect(page.speechText).toBeTruthy();
     }
@@ -240,5 +241,51 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
       fireEvent.keyDown(window, { key: 'ArrowLeft' });
     });
     expect(mockFlip).toHaveBeenCalled();
+  });
+
+  it('Página 4 deve reproduzir o novo áudio 04.1.wav, parar ao avançar para a página 5 e retomar 04.1 ao voltar', async () => {
+    const playSpy = vi.spyOn(globalAudioManager, 'loadAndPlay');
+    const stopSpy = vi.spyOn(globalAudioManager, 'stopAndReset');
+
+    render(<BookReader book={theo} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Começar a ler e ouvir/i }));
+    });
+
+    // 1. Navega até a Página 3
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 2 }); // index 2 = página 3
+    });
+    expect(screen.getByText('3 / 14')).toBeInTheDocument();
+    expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/03.wav', false);
+
+    // 2. Navega até a Página 4
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 3 }); // index 3 = página 4
+    });
+    expect(screen.getByText('4 / 14')).toBeInTheDocument();
+    expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/04.1.wav', false);
+
+    // 3. Reproduz o áudio na página 4
+    const playBtn = screen.getByRole('button', { name: /Ouvir narração da página/i });
+    await act(async () => {
+      fireEvent.click(playBtn);
+    });
+
+    // 4. Avança para a Página 5 durante a reprodução
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 4 }); // index 4 = página 5
+    });
+    expect(screen.getByText('5 / 14')).toBeInTheDocument();
+    expect(stopSpy).toHaveBeenCalled();
+    expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/05.wav', false);
+
+    // 5. Retorna para a Página 4
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 3 }); // volta para página 4
+    });
+    expect(screen.getByText('4 / 14')).toBeInTheDocument();
+    expect(playSpy).toHaveBeenLastCalledWith('/books/theo/audio/04.1.wav', false);
   });
 });
