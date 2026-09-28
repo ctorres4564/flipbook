@@ -20,6 +20,9 @@ O livro foi adicionado seguindo o padrão desacoplado e declarativo `BookManifes
 └── audio/
     ├── 01.wav               (Narração da Página 1)
     ├── 02.wav               (Narração da Página 2)
+    ├── 03.wav               (Narração da Página 3)
+    ├── 04.1.wav             (Narração da Página 4 - Versão Atualizada 4.1)
+    ├── 04.wav               (Backup original)
     ├── ...
     └── 14.wav               (Narração da Página 14)
 ```
