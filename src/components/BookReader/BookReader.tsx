@@ -165,7 +165,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       img.src = page.image;
       img.alt = page.alt || `Página ${page.pageNumber}`;
       img.className = 'page-image';
-      img.loading = page.pageNumber <= 2 ? 'eager' : 'lazy';
+      img.decoding = 'async';
 
       pageEl.appendChild(img);
       container.appendChild(pageEl);
