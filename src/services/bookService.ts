@@ -122,6 +122,9 @@ export function getDefaultBookSlugForHost(hostname?: string): string {
   if (host === 'nico.folheia.com' || host === 'nico.localhost') {
     return 'nico';
   }
+  if (host === 'theo.folheia.com' || host === 'theo.localhost') {
+    return 'theo';
+  }
   return DEFAULT_BOOK_SLUG;
 }
 

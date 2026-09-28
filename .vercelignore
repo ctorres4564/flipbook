@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-ssr
+.git
+livro_caminhos_de_nina
+livro_nico
+livro_theo_tem_uma_historia_pra_contar
+test-results
+playwright-report
+blob-report
