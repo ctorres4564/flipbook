@@ -1,61 +1,48 @@
 {
   "cleanUrls": true,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/",
+      "src": "/$",
       "has": [
         {
           "type": "host",
           "value": "theo.folheia.com"
         }
       ],
-      "destination": "/livros/theo/index.html"
+      "dest": "/livros/theo/index.html"
     },
     {
-      "source": "/",
+      "src": "/$",
       "has": [
         {
           "type": "host",
           "value": "nico.folheia.com"
         }
       ],
-      "destination": "/livros/nico/index.html"
+      "dest": "/livros/nico/index.html"
     },
     {
-      "source": "/livros/theo",
-      "destination": "/livros/theo/index.html"
+      "src": "/livros/theo/?$",
+      "dest": "/livros/theo/index.html"
     },
     {
-      "source": "/livros/theo/",
-      "destination": "/livros/theo/index.html"
+      "src": "/livros/nico/?$",
+      "dest": "/livros/nico/index.html"
     },
     {
-      "source": "/livros/nico",
-      "destination": "/livros/nico/index.html"
+      "src": "/livros/caminhos-de-nina/?$",
+      "dest": "/livros/caminhos-de-nina/index.html"
     },
     {
-      "source": "/livros/nico/",
-      "destination": "/livros/nico/index.html"
+      "src": "/livros/cartilha-engasgo/?$",
+      "dest": "/livros/cartilha-engasgo/index.html"
     },
     {
-      "source": "/livros/caminhos-de-nina",
-      "destination": "/livros/caminhos-de-nina/index.html"
+      "handle": "filesystem"
     },
     {
-      "source": "/livros/caminhos-de-nina/",
-      "destination": "/livros/caminhos-de-nina/index.html"
-    },
-    {
-      "source": "/livros/cartilha-engasgo",
-      "destination": "/livros/cartilha-engasgo/index.html"
-    },
-    {
-      "source": "/livros/cartilha-engasgo/",
-      "destination": "/livros/cartilha-engasgo/index.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

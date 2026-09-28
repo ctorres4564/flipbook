@@ -77,20 +77,20 @@ describe('Social Metadata & Open Graph Injection', () => {
     expect(transformedNina).toContain(`<meta property="og:description" content="${ninaManifest.description}" />`);
   });
 
-  it('vercel.json deve conter rewrites por host para theo.folheia.com e rotas de livros', () => {
+  it('vercel.json deve conter routes por host para theo.folheia.com e rotas de livros', () => {
     const vercelConfig = JSON.parse(fs.readFileSync(path.resolve('vercel.json'), 'utf-8'));
-    expect(vercelConfig.rewrites).toBeDefined();
+    expect(vercelConfig.routes).toBeDefined();
 
-    const theoHostRewrite = vercelConfig.rewrites.find(
-      (r: any) => r.source === '/' && r.has?.some((h: any) => h.type === 'host' && h.value === 'theo.folheia.com')
+    const theoHostRoute = vercelConfig.routes.find(
+      (r: any) => r.src === '/$' && r.has?.some((h: any) => h.type === 'host' && h.value === 'theo.folheia.com')
     );
-    expect(theoHostRewrite).toBeDefined();
-    expect(theoHostRewrite.destination).toBe('/livros/theo/index.html');
+    expect(theoHostRoute).toBeDefined();
+    expect(theoHostRoute.dest).toBe('/livros/theo/index.html');
 
-    const theoRouteRewrite = vercelConfig.rewrites.find(
-      (r: any) => r.source === '/livros/theo'
+    const theoBookRoute = vercelConfig.routes.find(
+      (r: any) => r.src === '/livros/theo/?$'
     );
-    expect(theoRouteRewrite).toBeDefined();
-    expect(theoRouteRewrite.destination).toBe('/livros/theo/index.html');
+    expect(theoBookRoute).toBeDefined();
+    expect(theoBookRoute.dest).toBe('/livros/theo/index.html');
   });
 });
