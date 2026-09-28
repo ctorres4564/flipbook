@@ -21,6 +21,10 @@
       "destination": "/livros/nico/index.html"
     },
     {
+      "source": "/",
+      "destination": "/livros/caminhos-de-nina/index.html"
+    },
+    {
       "source": "/livros/theo",
       "destination": "/livros/theo/index.html"
     },
@@ -54,7 +58,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/livros/caminhos-de-nina/index.html"
     }
   ]
 }

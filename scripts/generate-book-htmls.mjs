@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Importa os manifestos oficiais dos livros
 import theoManifest from '../src/books/theo/book.json' with { type: 'json' };
@@ -7,17 +8,7 @@ import nicoManifest from '../src/books/nico/book.json' with { type: 'json' };
 import ninaManifest from '../src/books/caminhos-de-nina/book.json' with { type: 'json' };
 import cartilhaManifest from '../src/books/cartilha-engasgo/book.json' with { type: 'json' };
 
-const DIST_DIR = path.resolve('dist');
-const BASE_HTML_PATH = path.join(DIST_DIR, 'index.html');
-
-if (!fs.existsSync(BASE_HTML_PATH)) {
-  console.error(`Erro: Arquivo base ${BASE_HTML_PATH} não encontrado. Execute o build do Vite primeiro.`);
-  process.exit(1);
-}
-
-const baseHtml = fs.readFileSync(BASE_HTML_PATH, 'utf-8');
-
-const booksMetadata = [
+export const booksMetadata = [
   {
     slug: 'theo',
     title: 'Theo Tem uma História para Contar | Fonosuite',
@@ -100,19 +91,34 @@ export function injectMetadata(html, meta) {
   return result.replace('</head>', `${tags}\n  </head>`);
 }
 
-// 1. Gera os arquivos HTML para cada livro em dist/livros/[slug]/index.html
-for (const book of booksMetadata) {
-  const targetDir = path.join(DIST_DIR, 'livros', book.slug);
-  fs.mkdirSync(targetDir, { recursive: true });
+export function generateBookHtmls() {
+  const DIST_DIR = path.resolve('dist');
+  const BASE_HTML_PATH = path.join(DIST_DIR, 'index.html');
 
-  const customHtml = injectMetadata(baseHtml, book);
-  const targetFile = path.join(targetDir, 'index.html');
-  fs.writeFileSync(targetFile, customHtml, 'utf-8');
-  console.log(`Gerado HTML estático com metadados para: /livros/${book.slug} (${targetFile})`);
+  if (!fs.existsSync(BASE_HTML_PATH)) {
+    console.error(`Erro: Arquivo base ${BASE_HTML_PATH} não encontrado. Execute o build do Vite primeiro.`);
+    process.exit(1);
+  }
+
+  const baseHtml = fs.readFileSync(BASE_HTML_PATH, 'utf-8');
+
+  // 1. Gera os arquivos HTML para cada livro em dist/livros/[slug]/index.html
+  for (const book of booksMetadata) {
+    const targetDir = path.join(DIST_DIR, 'livros', book.slug);
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    const customHtml = injectMetadata(baseHtml, book);
+    const targetFile = path.join(targetDir, 'index.html');
+    fs.writeFileSync(targetFile, customHtml, 'utf-8');
+    console.log(`Gerado HTML estático com metadados para: /livros/${book.slug} (${targetFile})`);
+  }
+
+  // 2. Remove dist/index.html físico para que a Vercel consulte os rewrites por host na raiz
+  fs.unlinkSync(BASE_HTML_PATH);
+  console.log('Removido dist/index.html físico para permitir rewrites por host na raiz da Vercel');
 }
 
-// 2. Atualiza dist/index.html raiz com os metadados de Os Caminhos de Nina (livro padrão)
-const ninaMeta = booksMetadata.find(b => b.slug === 'caminhos-de-nina');
-const rootHtml = injectMetadata(baseHtml, ninaMeta);
-fs.writeFileSync(BASE_HTML_PATH, rootHtml, 'utf-8');
-console.log(`Atualizado dist/index.html com metadados padrão Open Graph`);
+const currentFile = fileURLToPath(import.meta.url);
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(currentFile)) {
+  generateBookHtmls();
+}
