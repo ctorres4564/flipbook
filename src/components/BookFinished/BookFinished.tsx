@@ -9,13 +9,17 @@ interface BookFinishedProps {
 
 export const BookFinished: React.FC<BookFinishedProps> = ({ book, onRestart }) => {
   const [copied, setCopied] = React.useState(false);
+  const isCartilha = book.slug.includes('cartilha') || book.slug.includes('engasgo');
+  const restartLabel = isCartilha ? 'Reler a cartilha desde o início' : 'Ler o livro novamente';
+  const restartText = isCartilha ? 'Reler Cartilha' : 'Ler Novamente';
+  const shareText = isCartilha ? `Cartilha Educativa: ${book.title} — ${book.author}` : `Livro Infantil: ${book.title}`;
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: book.title,
-          text: `Cartilha Educativa: ${book.title} — ${book.author}`,
+          text: shareText,
           url: window.location.href,
         });
       } catch {
@@ -29,7 +33,7 @@ export const BookFinished: React.FC<BookFinishedProps> = ({ book, onRestart }) =
   };
 
   return (
-    <div className="finished-screen" role="dialog" aria-modal="true" aria-label="Fim da leitura da cartilha">
+    <div className="finished-screen" role="dialog" aria-modal="true" aria-label={isCartilha ? 'Fim da leitura da cartilha' : 'Fim da leitura do livro'}>
       <div className="cover-card finished-card">
         <div className="finished-icon-badge">
           <Heart size={36} color="#38bdf8" />
@@ -38,7 +42,9 @@ export const BookFinished: React.FC<BookFinishedProps> = ({ book, onRestart }) =
         <h2 className="cover-title">Você concluiu a leitura!</h2>
         
         <p className="cover-description">
-          Cuidar de quem amamos exige atenção, carinho e conhecimento. Esperamos que estas orientações tragam mais segurança e tranquilidade para a rotina alimentar em sua casa.
+          {isCartilha
+            ? 'Cuidar de quem amamos exige atenção, carinho e conhecimento. Esperamos que estas orientações tragam mais segurança e tranquilidade para a rotina alimentar em sua casa.'
+            : 'Parabéns por concluir esta história! Esperamos que tenha aproveitado cada página e cada descoberta.'}
         </p>
 
         {book.author && (
@@ -57,11 +63,11 @@ export const BookFinished: React.FC<BookFinishedProps> = ({ book, onRestart }) =
             id="btn-restart-book"
             onClick={onRestart}
             className="btn-start"
-            aria-label="Reler a cartilha desde o início"
+            aria-label={restartLabel}
             autoFocus
           >
             <RotateCcw size={20} />
-            <span>Reler Cartilha</span>
+            <span>{restartText}</span>
           </button>
 
           {book.pdfUrl && (

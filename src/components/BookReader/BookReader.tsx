@@ -185,28 +185,17 @@ export const BookReader: React.FC<BookReaderProps> = ({ book }) => {
       const availWidth = Math.max(160, stageWidth - paddingX);
       const availHeight = Math.max(160, stageHeight - paddingY);
 
-      const isPortrait = book.aspectRatio === 'portrait' || (book.pageDimensions && book.pageDimensions.height > book.pageDimensions.width);
-      const targetAspect = isPortrait
-        ? (book.pageDimensions ? book.pageDimensions.width / book.pageDimensions.height : 420 / 595)
-        : 1.0;
+      const targetAspect = book.pageDimensions
+        ? book.pageDimensions.width / book.pageDimensions.height
+        : (book.aspectRatio === 'portrait' ? 420 / 595 : 1.0);
 
-      let baseWidth: number;
-      let baseHeight: number;
+      let baseHeight = Math.round(availHeight);
+      let baseWidth = Math.round(baseHeight * targetAspect);
 
-      if (isPortrait) {
-        // Ajusta para caber na altura disponível mantendo a proporção A5
-        baseHeight = Math.round(availHeight);
-        baseWidth = Math.round(baseHeight * targetAspect);
-
-        // Se a largura ultrapassar o espaço disponível, reescala pela largura
-        if (baseWidth > availWidth) {
-          baseWidth = Math.round(availWidth);
-          baseHeight = Math.round(baseWidth / targetAspect);
-        }
-      } else {
-        const baseDimension = Math.round(Math.min(availWidth, availHeight));
-        baseWidth = baseDimension;
-        baseHeight = baseDimension;
+      // Garante que o livro caiba integralmente dentro da área útil sem estourar largura nem altura
+      if (baseWidth > availWidth) {
+        baseWidth = Math.round(availWidth);
+        baseHeight = Math.round(baseWidth / targetAspect);
       }
 
       const pageFlip = new PageFlip(container, {
