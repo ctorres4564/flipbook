@@ -44,7 +44,7 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     expect(book).toBeDefined();
     expect(book?.slug).toBe('theo');
     expect(book?.title).toBe('Theo Tem uma História para Contar');
-    expect(getBookDocumentTitle(book)).toBe('Theo Tem uma História para Contar | Flipbook Narrado');
+    expect(getBookDocumentTitle(book)).toBe('Theo Tem uma História para Contar | Fonosuite');
 
     // Validação estrita do manifesto
     const validation = validateBookManifest(theo);

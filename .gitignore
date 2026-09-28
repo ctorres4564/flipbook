@@ -31,6 +31,9 @@ blob-report/
 
 # Large raw media assets (exceeds GitHub 100MB limit)
 livro_nico/assets/novas_imagens/
+livro_caminhos_de_nina/
+livro_theo_tem_uma_historia_pra_contar/
+.vercel/
 *.pdf
 
 # Editor directories and files

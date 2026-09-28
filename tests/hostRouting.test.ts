@@ -73,6 +73,6 @@ describe('Host Detection & Subdomain Routing (nico.folheia.com)', () => {
   it('deve formatar o título correto da aba para theo.folheia.com (Theo Tem uma História...)', () => {
     const theoBook = getBookBySlug('theo');
     const title = getBookDocumentTitle(theoBook);
-    expect(title).toBe('Theo Tem uma História para Contar | Flipbook Narrado');
+    expect(title).toBe('Theo Tem uma História para Contar | Fonosuite');
   });
 });

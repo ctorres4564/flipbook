@@ -79,18 +79,18 @@ describe('Subdomain & Route Flow Integration Tests', () => {
     renderTestApp('/', 'theo.folheia.com');
     const titles = await screen.findAllByText('Theo Tem uma História para Contar');
     expect(titles.length).toBeGreaterThan(0);
-    expect(document.title).toBe('Theo Tem uma História para Contar | Flipbook Narrado');
+    expect(document.title).toBe('Theo Tem uma História para Contar | Fonosuite');
   });
 
   it('7. rota tradicional /livros/theo deve abrir o livro do Theo em qualquer domínio', async () => {
     renderTestApp('/livros/theo', 'folheia.com');
     const titles = await screen.findAllByText('Theo Tem uma História para Contar');
     expect(titles.length).toBeGreaterThan(0);
-    expect(document.title).toBe('Theo Tem uma História para Contar | Flipbook Narrado');
+    expect(document.title).toBe('Theo Tem uma História para Contar | Fonosuite');
   });
 
   it('8. título da aba correto em theo.folheia.com', async () => {
     renderTestApp('/', 'theo.folheia.com');
-    expect(document.title).toBe('Theo Tem uma História para Contar | Flipbook Narrado');
+    expect(document.title).toBe('Theo Tem uma História para Contar | Fonosuite');
   });
 });
