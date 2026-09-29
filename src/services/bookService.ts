@@ -86,6 +86,9 @@ export function getPageSpeechText(manifest: BookManifest, pageNumber: number): s
     return null;
   }
   const page = manifest.pages[pageNumber - 1];
+  if (page.speechText === null) {
+    return null;
+  }
   return page.speechText || page.alt || page.title || null;
 }
 

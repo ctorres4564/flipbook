@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BookReader } from '../src/components/BookReader/BookReader';
 import theoManifest from '../src/books/theo/book.json';
@@ -56,13 +58,13 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     expect(getBookBySlug('theo-tem-uma-historia-para-contar')).toBeDefined();
   });
 
-  it('J) deve possuir exatamente 14 páginas narradas, com proporção landscape e associação 1:1 rigorosa', () => {
-    expect(theo.totalPages).toBe(14);
-    expect(theo.pages).toHaveLength(14);
+  it('J) deve possuir exatamente 15 páginas (14 narradas + 1 contracapa sem áudio), com proporção landscape e associação 1:1 rigorosa', () => {
+    expect(theo.totalPages).toBe(15);
+    expect(theo.pages).toHaveLength(15);
     expect(theo.aspectRatio).toBe('landscape');
     expect(theo.pageDimensions).toEqual({ width: 1448, height: 1086 });
 
-    // Validação individual das 14 páginas e áudios
+    // Validação individual das 14 páginas narradas
     for (let i = 1; i <= 14; i++) {
       const page = theo.pages[i - 1];
       const pad = String(i).padStart(2, '0');
@@ -73,6 +75,25 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
       expect(page.alt).toBeTruthy();
       expect(page.speechText).toBeTruthy();
     }
+
+    // Validação estrita da Contracapa (Página 15)
+    const contracapa = theo.pages[14];
+    expect(contracapa.pageNumber).toBe(15);
+    expect(contracapa.image).toBe('/books/theo/pages/15.webp');
+    expect(contracapa.audio).toBeNull();
+    expect(contracapa.speechText).toBeNull();
+    expect(contracapa.title).toBe('Contracapa');
+    expect(contracapa.alt).toContain('Contracapa');
+
+    // Validação dos arquivos físicos em public/
+    const diskWebp = path.resolve(__dirname, '../public/books/theo/pages/15.webp');
+    const diskPng = path.resolve(__dirname, '../public/books/theo/pages/15.png');
+    const sourcePng = path.resolve(__dirname, '../livro_theo_tem_uma_historia_pra_contar/assets/imagens/contracapa.png');
+
+    expect(fs.existsSync(diskWebp)).toBe(true);
+    expect(fs.existsSync(diskPng)).toBe(true);
+    expect(fs.statSync(diskPng).size).toBe(fs.statSync(sourcePng).size);
+    expect(fs.statSync(diskWebp).size).toBeGreaterThan(100000);
   });
 
   it('B & C) deve abrir inicialmente na tela de Apresentação e transicionar para a Página 1 ao clicar em Começar', async () => {
@@ -87,8 +108,8 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
       fireEvent.click(startButton);
     });
 
-    // Modo de leitura ativo na página 1 de 14
-    expect(screen.getByText('1 / 14')).toBeInTheDocument();
+    // Modo de leitura ativo na página 1 de 15
+    expect(screen.getByText('1 / 15')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Ouvir narração da página/i })).toBeInTheDocument();
   });
 
@@ -120,7 +141,7 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     });
 
     // Áudio anterior deve parar e novo áudio assumir
-    expect(screen.getByText('2 / 14')).toBeInTheDocument();
+    expect(screen.getByText('2 / 15')).toBeInTheDocument();
     expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/02.wav', false);
   });
 
@@ -140,7 +161,7 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
       if (flipCallback) flipCallback({ data: 6 }); // pag 7
     });
 
-    expect(screen.getByText('7 / 14')).toBeInTheDocument();
+    expect(screen.getByText('7 / 15')).toBeInTheDocument();
     expect(playSpy).toHaveBeenLastCalledWith('/books/theo/audio/07.wav', false);
   });
 
@@ -157,14 +178,14 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     await act(async () => {
       if (flipCallback) flipCallback({ data: 2 });
     });
-    expect(screen.getByText('3 / 14')).toBeInTheDocument();
+    expect(screen.getByText('3 / 15')).toBeInTheDocument();
 
     // Volta para página 2
     await act(async () => {
       if (flipCallback) flipCallback({ data: 1 });
     });
 
-    expect(screen.getByText('2 / 14')).toBeInTheDocument();
+    expect(screen.getByText('2 / 15')).toBeInTheDocument();
     expect(playSpy).toHaveBeenLastCalledWith('/books/theo/audio/02.wav', false);
   });
 
@@ -191,22 +212,82 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     expect(screen.queryByRole('button', { name: /Pausar narração/i })).not.toBeInTheDocument();
   });
 
-  it('K & L) chegar à página 14 e concluir deve permitir reiniciar o livro com sessão limpa', async () => {
+  it('TESTE B, C, D, E) Transição da Página 14 para a Contracapa (Página 15) e retorno bidirecional', async () => {
+    const playSpy = vi.spyOn(globalAudioManager, 'loadAndPlay');
+    const stopSpy = vi.spyOn(globalAudioManager, 'stopAndReset');
+
     render(<BookReader book={theo} />);
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Começar a ler e ouvir/i }));
     });
 
-    // Navega até a página 14
+    // 1. Navega até a Página 14
     await act(async () => {
-      if (flipCallback) flipCallback({ data: 13 }); // pag 14
+      if (flipCallback) flipCallback({ data: 13 }); // index 13 = página 14
     });
-    expect(screen.getByText('14 / 14')).toBeInTheDocument();
+    expect(screen.getByText('14 / 15')).toBeInTheDocument();
+    expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/14.wav', false);
+    expect(screen.getByRole('button', { name: /Ouvir narração da página/i })).toBeInTheDocument();
 
-    // Avança além da última página (fim do livro)
+    // 2. Inicia a reprodução do áudio 14
+    const playBtn14 = screen.getByRole('button', { name: /Ouvir narração da página/i });
     await act(async () => {
-      if (flipCallback) flipCallback({ data: 14 }); // > 14
+      fireEvent.click(playBtn14);
+    });
+
+    // 3. TESTE C: Enquanto estiver tocando o áudio 14, avança para a Contracapa (Página 15)
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 14 }); // index 14 = página 15 (contracapa)
+    });
+
+    // RESULTADO OBRIGATÓRIO:
+    // - O áudio da página 14 deve parar imediatamente (stopAndReset chamado)
+    // - Nenhum novo áudio deve iniciar
+    // - Controles exclusivos de reprodução de áudio ficam ocultos
+    expect(screen.getByText('15 / 15')).toBeInTheDocument();
+    expect(stopSpy).toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /Ouvir narração da página/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Pausar narração/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Ouvir novamente do início/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Desativar som|Ativar som/i })).not.toBeInTheDocument();
+
+    // 4. TESTE D: Na contracapa, volta para a Página 14
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 13 }); // volta para página 14
+    });
+
+    // Confirmações: imagem correta, áudio 14 associado, controles restaurados
+    expect(screen.getByText('14 / 15')).toBeInTheDocument();
+    expect(playSpy).toHaveBeenLastCalledWith('/books/theo/audio/14.wav', false);
+    expect(screen.getByRole('button', { name: /Ouvir narração da página/i })).toBeInTheDocument();
+
+    // 5. TESTE E: Volta novamente à contracapa
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 14 }); // volta para a contracapa
+    });
+
+    expect(screen.getByText('15 / 15')).toBeInTheDocument();
+    expect(stopSpy).toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /Ouvir narração da página/i })).not.toBeInTheDocument();
+  });
+
+  it('K & L) chegar à contracapa (página 15) e avançar deve concluir o livro e permitir reiniciar', async () => {
+    render(<BookReader book={theo} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Começar a ler e ouvir/i }));
+    });
+
+    // Navega até a contracapa (página 15)
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 14 }); // pag 15
+    });
+    expect(screen.getByText('15 / 15')).toBeInTheDocument();
+
+    // Avança além da contracapa (conclusão do livro)
+    await act(async () => {
+      if (flipCallback) flipCallback({ data: 15 }); // > 15
     });
 
     // Tela de conclusão
@@ -257,14 +338,14 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     await act(async () => {
       if (flipCallback) flipCallback({ data: 2 }); // index 2 = página 3
     });
-    expect(screen.getByText('3 / 14')).toBeInTheDocument();
+    expect(screen.getByText('3 / 15')).toBeInTheDocument();
     expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/03.wav', false);
 
     // 2. Navega até a Página 4
     await act(async () => {
       if (flipCallback) flipCallback({ data: 3 }); // index 3 = página 4
     });
-    expect(screen.getByText('4 / 14')).toBeInTheDocument();
+    expect(screen.getByText('4 / 15')).toBeInTheDocument();
     expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/04.1.wav', false);
 
     // 3. Reproduz o áudio na página 4
@@ -277,7 +358,7 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     await act(async () => {
       if (flipCallback) flipCallback({ data: 4 }); // index 4 = página 5
     });
-    expect(screen.getByText('5 / 14')).toBeInTheDocument();
+    expect(screen.getByText('5 / 15')).toBeInTheDocument();
     expect(stopSpy).toHaveBeenCalled();
     expect(playSpy).toHaveBeenCalledWith('/books/theo/audio/05.wav', false);
 
@@ -285,7 +366,7 @@ describe('Flipbook Narrado "Theo Tem uma História para Contar" - Testes Obrigat
     await act(async () => {
       if (flipCallback) flipCallback({ data: 3 }); // volta para página 4
     });
-    expect(screen.getByText('4 / 14')).toBeInTheDocument();
+    expect(screen.getByText('4 / 15')).toBeInTheDocument();
     expect(playSpy).toHaveBeenLastCalledWith('/books/theo/audio/04.1.wav', false);
   });
 });

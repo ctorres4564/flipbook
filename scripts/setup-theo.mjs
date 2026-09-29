@@ -127,6 +127,14 @@ const pagesData = [
     title: 'Página 14',
     alt: 'Theo junto da família em um momento afetivo e tranquilo, encerrando a história.',
     speechText: 'Theo ainda tinha muitas histórias para contar. Algumas começavam com uma palavra. Outras, com um gesto. E sempre que Theo tentava contar alguma coisa, havia alguém disposto a escutar.'
+  },
+  {
+    pageNumber: 15,
+    rawImageName: 'contracapa.png',
+    rawAudioName: null,
+    title: 'Contracapa',
+    alt: 'Contracapa do livro Theo Tem uma História para Contar',
+    speechText: null
   }
 ];
 
@@ -156,16 +164,20 @@ async function run() {
     const webpStat = fs.statSync(destImgWebpPath);
     console.log(`Página ${padNum}: PNG (${(origPngStat.size / 1024).toFixed(1)} KB) -> WebP (${(webpStat.size / 1024).toFixed(1)} KB)`);
 
-    // Copia áudio original (.wav)
-    const srcAudioPath = path.join(SRC_AUDIO_DIR, item.rawAudioName);
-    const destAudioName = `${padNum}.wav`;
-    const destAudioPath = path.join(DEST_AUDIO_DIR, destAudioName);
-    fs.copyFileSync(srcAudioPath, destAudioPath);
+    // Copia áudio original (.wav) se existir
+    let audioUrl = null;
+    if (item.rawAudioName) {
+      const srcAudioPath = path.join(SRC_AUDIO_DIR, item.rawAudioName);
+      const destAudioName = `${padNum}.wav`;
+      const destAudioPath = path.join(DEST_AUDIO_DIR, destAudioName);
+      fs.copyFileSync(srcAudioPath, destAudioPath);
+      audioUrl = `/books/theo/audio/${destAudioName}`;
+    }
 
     manifestPages.push({
       pageNumber: item.pageNumber,
       image: `/books/theo/pages/${destImgWebpName}`,
-      audio: `/books/theo/audio/${destAudioName}`,
+      audio: audioUrl,
       alt: item.alt,
       title: item.title,
       speechText: item.speechText
@@ -175,10 +187,10 @@ async function run() {
   const bookManifest = {
     slug: 'theo',
     title: 'Theo Tem uma História para Contar',
-    documentTitle: 'Theo Tem uma História para Contar | Flipbook Narrado',
+    documentTitle: 'Theo Tem uma História para Contar | Fonosuite',
     description: 'Theo tem uma história todinha em sua cabeça. Com paciência, apoio da família e encontrando suas próprias formas de se comunicar, ele descobre que sempre há alguém disposto a escutar.',
     coverImage: '/books/theo/pages/01.webp',
-    totalPages: 14,
+    totalPages: 15,
     aspectRatio: 'landscape',
     pageDimensions: {
       width: 1448,
