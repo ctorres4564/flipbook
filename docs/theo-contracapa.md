@@ -2,6 +2,15 @@
 
 Este documento descreve a arquitetura, o fluxo de dados e os procedimentos de manutenção para a contracapa do livro digital ilustrado **"Theo Tem uma História para Contar"** (`slug: theo`), disponibilizado no leitor web narrado.
 
+
+
+### 2.3 Atualização dos Telefones de Contato (Página 15)
+- **Número anterior:** `(21) 98056-7699` (WhatsApp e Telefone)
+- **Número atualizado oficial:** `(21) 97748-6801` (WhatsApp e Telefone)
+- **Tipografia e Cor:** Poppins Bold 24px, cor `#072652`
+- **Técnica de Preservação:** Interpolação horizontal contínua de linhas de fundo com @napi-rs/canvas, eliminando os números anteriores sem qualquer artefato ou desfoque no restante da arte original.
+- **Script de automação:** `livro_theo_tem_uma_historia_pra_contar/scripts/update_contracapa.mjs`
+
 ---
 
 ## 1. Objetivo da Funcionalidade
